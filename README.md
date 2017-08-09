@@ -2,5 +2,5 @@
 ---
 Welcome to FIX Language Examples page.
 
-- `ordersOnly.ipl` - Minimal model that accepts/rejects `SingleOrderNew`
-- `ordersWithFills.ipl` - Model accepting/rejecting `SingleOrderNew` messages and generating fills
+- `ordersOnly.ipl` - Minimal model that accepts/rejects `NewOrderSingle`
+- `ordersWithFills.ipl` - Model accepting/rejecting `NewOrderSingle` messages and generating fills
