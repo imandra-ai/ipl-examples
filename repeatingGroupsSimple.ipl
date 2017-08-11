@@ -1,4 +1,13 @@
-imandramarkets : 0.0.0
+//
+//  Aesthetic Integration Limited
+//  Copyright (c) 2014 - 2017
+//
+//  FIX 4.4 model with example repeating groups import
+//   
+//  For further info see https://docs.imandra.ai
+//
+
+imandramarkets : 1.0.0
 
 import FIX_4_4
 
