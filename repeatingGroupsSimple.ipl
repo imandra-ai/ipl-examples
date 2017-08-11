@@ -14,6 +14,10 @@ internal state {
         CumQty:Qty = 0.0;
         AvgPx:Price = 0.0;
         OrdStatus:OrdStatus = OrdStatus.Replaced;
+        // UndInstrmtGrp is a Repeating Group
+        // Here the initial value is set up 
+        // This is only required for non-optional values
+        // But is valid for any field within the group
         UndInstrmtGrp: UndInstrmtGrp = {
             NoUnderlyings = Some 4;
             UnderlyingInstrument = {
@@ -26,8 +30,13 @@ internal state {
                 };
             };
         };
-           
-           Instrument :* Instrument = {CFICode = "1";};
+
+        // CFICode is a field within a component block.
+        // It is imported in messages both optionally and as a required field
+        // thus it has the ':*' annotation
+        Instrument :* Instrument = {
+            CFICode = "1";
+        };
    }
 
 }
@@ -43,16 +52,20 @@ outbound message ExecutionReport {
     req LeavesQty
     req CumQty
     req AvgPx
+    // for repeating groups the whole group is imported and the optionality of field elements
+    // is the same for each copy
     req UndInstrmtGrp 
         valid when present(it.NoUnderlyings)
         valid when it.UnderlyingInstrument.EncodedUnderlyingIssuer == (Some "a")
         valid when it.UnderlyingInstrument.UndSecAltIDGrp.UnderlyingSecurityAltIDSource == (Some "d")
+    // for elements of component blocks, each one must be explicitly imported
     opt Instrument.CFICode valid when it == (Some "")
 
     
 }
 
 action fill {
+    // a declaration of an action field which is a repeating group type
     undInstrmntGrp : UndInstrmtGrp
     cumQty : float
 }
@@ -70,6 +83,8 @@ message NewOrderSingle {
 }
 
 receive (msg:NewOrderSingle){
+    // the state assignable variables are set here 
+    // including all element of the repeating group recursively
     assignFrom(msg,state)
     send ExecutionReport state
 }
@@ -78,6 +93,7 @@ receive (f:fill){
     state.UndInstrmtGrp = f.undInstrmntGrp
 
     if f.cumQty > state.CumQty then
+    // here the "with" assignment overrides any within state
     send ExecutionReport {state with CumQty = f.cumQty;}
     else send ExecutionReport state
 
