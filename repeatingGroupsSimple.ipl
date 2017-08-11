@@ -1,0 +1,84 @@
+imandramarkets : 0.0.0
+
+import FIX_4_4
+
+internal state {
+    assignable {        
+        Side : Side = Side.Buy;
+        AccountType :? AccountType
+        Account :* String = "";
+        OrderID: String = "";
+        ExecID: String = "";
+        ExecType:ExecType = ExecType.Trade;
+        LeavesQty:Qty = 0.0;
+        CumQty:Qty = 0.0;
+        AvgPx:Price = 0.0;
+        OrdStatus:OrdStatus = OrdStatus.Replaced;
+        UndInstrmtGrp: UndInstrmtGrp = {
+            NoUnderlyings = Some 4;
+            UnderlyingInstrument = {
+                UndSecAltIDGrp = {
+                    UnderlyingSecurityAltIDSource = Some "d";
+                };
+                UnderlyingStipulations = {
+                    NoUnderlyingStips  = Some 5;
+                    UnderlyingStipType = Some "e";
+                };
+            };
+        };
+           
+           Instrument :* Instrument = {CFICode = "1";};
+   }
+
+}
+
+outbound message ExecutionReport {
+    req Account
+    opt AccountType
+    req OrderID
+    req ExecID
+    req ExecType
+    req OrdStatus
+    req Side 
+    req LeavesQty
+    req CumQty
+    req AvgPx
+    req UndInstrmtGrp 
+        valid when present(it.NoUnderlyings)
+        valid when it.UnderlyingInstrument.EncodedUnderlyingIssuer == (Some "a")
+        valid when it.UnderlyingInstrument.UndSecAltIDGrp.UnderlyingSecurityAltIDSource == (Some "d")
+    opt Instrument.CFICode valid when it == (Some "")
+
+    
+}
+
+action fill {
+    undInstrmntGrp : UndInstrmtGrp
+    cumQty : float
+}
+
+
+message NewOrderSingle {
+    opt Account 
+    opt AccountType
+    req ClOrdID
+    req Side
+    req TransactTime
+    req OrdType  
+    req UndInstrmtGrp 
+    req Instrument.CFICode
+}
+
+receive (msg:NewOrderSingle){
+    assignFrom(msg,state)
+    send ExecutionReport state
+}
+
+receive (f:fill){
+    state.UndInstrmtGrp = f.undInstrmntGrp
+
+    if f.cumQty > state.CumQty then
+    send ExecutionReport {state with CumQty = f.cumQty;}
+    else send ExecutionReport state
+
+}
