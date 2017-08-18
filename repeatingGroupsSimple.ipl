@@ -30,6 +30,7 @@ internal state {
         UndInstrmtGrp: UndInstrmtGrp = {
             NoUnderlyings = Some 4;
             UnderlyingInstrument = {
+                UnderlyingSymbol = Some "a";
                 UndSecAltIDGrp = {
                     UnderlyingSecurityAltIDSource = Some "d";
                 };
