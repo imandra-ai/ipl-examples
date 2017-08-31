@@ -4,3 +4,4 @@ Welcome to Imandra Protocol Language examples repo.
 
 - `ordersOnly.ipl` - Minimal model that accepts/rejects `NewOrderSingle`
 - `ordersWithFills.ipl` - Model accepting/rejecting `NewOrderSingle` messages and generating fills
+- `repeatingGroupsSimple.ipl` - Example of repeating groups usage
