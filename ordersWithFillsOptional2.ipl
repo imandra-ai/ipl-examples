@@ -1,0 +1,199 @@
+//
+//  Aesthetic Integration Limited
+//  Copyright (c) 2014 - 2017
+//
+//  Minimal FIX 4.4 model with fills
+//   
+//  For further info see https://docs.imandra.ai
+// 
+// 
+
+imandramarkets: 1.0.0
+import FIX_4_4
+
+
+// Import inbound NewOrderSingle message
+message NewOrderSingle {
+    req ClOrdID
+    req Side
+    req TransactTime
+    req OrdType valid when it in [ OrdType.Limit, OrdType.Market ]
+    req OrderQtyData.OrderQty
+    req Price
+
+	validate { state.live_order == false } 
+	
+	validate { state.OrdStatus in [ OrdStatus.New ]}
+}
+
+// Import an outbound message ExecutionReport
+outbound message ExecutionReport {
+    req OrderID
+    req ExecID
+    req ExecType
+    req OrdStatus
+    req Side
+    req LeavesQty
+    req CumQty
+    req AvgPx
+    opt Price
+    opt DayAvgPx
+}
+
+// Define the interface state
+internal state {
+
+    // The following fields would be assigned to 
+    assignable {
+        OrdStatus   : OrdStatus = OrdStatus.New;
+        Side        : Side = Side.Buy;
+        OrderID     : String = "";
+        LeavesQty   : Qty = 0.0;
+        CumQty      : Qty = 0.0;
+        AvgPx       : Price = 0.0;       
+        Price 		:* Price = 0.0;
+        OrdType		: OrdType = OrdType.Limit;
+        DayAvgPx    :? Price
+
+    }
+    
+    live_order : bool = false;
+    
+    // These are not required within the orders, etc...
+    OrdQty : Qty = 0.0;
+    filledQty : Qty = 0.0;
+    current_time : UTCTimeOnly = UTCTimeOnly (8, 0, 0, None);
+    temp_Price : Price = 0.0;
+
+    // Define the opening and closing times
+    opening_time : UTCTimeOnly = UTCTimeOnly (8, 0, 0, None);
+    closing_time : UTCTimeOnly = UTCTimeOnly (16, 0, 0, None);
+}
+
+
+//  Define how the model should process a validated
+//  incoming NewOrderSingle message
+receive ( msg : NewOrderSingle ) {
+	
+
+    // Extract all relevant fields from within the message
+    assignFrom (msg, state)
+    
+    state.live_order = true
+
+    // reset the DayAvgPx if below a certain figure
+    state.temp_Price = case (state.DayAvgPx) {Some x : x} {None : 0.0}
+    
+    state.DayAvgPx = if state.temp_Price > 10.0 
+        then Some state.temp_Price 
+        else None
+
+    send ExecutionReport {
+        state with 
+            ExecID = "";
+            ExecType = ExecType.New;
+    }
+    
+}
+
+// Handle rejections for 'NewOrderSingle'
+reject ( msg : NewOrderSingle, rejectReason : string ) {
+
+    // A field is missing 
+    missingfield : {
+         send ExecutionReport {
+            state with
+                ExecID = "";
+                ExecType = ExecType.Rejected;
+        }
+    }
+    
+    invalidfield : {
+        send ExecutionReport {
+            state with
+                ExecID = "";
+                ExecType = ExecType.Rejected;
+        }    
+    }
+    
+    // One or more 'validate' statements is invalid
+    invalid : {
+        send ExecutionReport {
+            state with
+                ExecID = "";
+                ExecType = ExecType.Rejected;
+        }
+   }
+}
+
+// Define action 'time_change'
+action time_change {
+    new_time : UTCTimeOnly
+    
+    validate { this.new_time <= state.closing_time }
+
+    validate { this.new_time >= state.current_time && state.OrdStatus == OrdStatus.New }
+}
+
+// Define logic for handling this 'time_change' action
+receive ( act : time_change ) {
+    // Save the new time into internal state
+    state.current_time = act.new_time
+
+    // If it's past closing time, then cancel the order and send
+    // out the ExecutionReport
+    if ( act.new_time >= state.closing_time) then {
+        state.OrdStatus = OrdStatus.Expired
+        state.live_order = false
+        
+        send ExecutionReport {
+            state with 
+                ExecID = "";
+                ExecType = ExecType.New;
+        }
+    }
+}
+
+//
+// Define action 'fill'
+//
+action fill {
+
+	fill_time : UTCTimeOnly
+    fill_price : Price
+    fill_qty : Qty
+
+    validate { this.fill_qty > 0.0 && this.fill_qty < state.LeavesQty }
+
+    validate { this.fill_price > 0.0 && ( 
+				 state.OrdType == OrdType.Limit ) ==> 
+        				( case state.Price 
+        					{ Some p:
+        						if ( state.Side == Side.Buy ) then
+        							( this.fill_price <= p )
+        						else ( this.fill_price >= p ) } 
+        					{ None: true } ) 
+            }
+
+}
+
+// Receiving fills and sending out 
+receive ( f : fill ) {
+
+    state.LeavesQty = state.LeavesQty - f.fill_qty
+    state.filledQty = state.filledQty + f.fill_qty
+        
+    state.AvgPx = ( state.AvgPx * state.filledQty + f.fill_qty * f.fill_price ) / ( f.fill_qty + state.filledQty )
+
+
+    if state.LeavesQty == 0.0 then 
+        state.OrdStatus = OrdStatus.Filled
+    else 
+        state.OrdStatus = OrdStatus.PartiallyFilled
+        
+    send ExecutionReport { state with 
+        ExecID = "";
+        ExecType = ExecType.New;
+    }
+}
+    
