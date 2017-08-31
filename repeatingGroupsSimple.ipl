@@ -24,22 +24,7 @@ internal state {
         AvgPx:Price = 0.0;
         OrdStatus:OrdStatus = OrdStatus.Replaced;
         // UndInstrmtGrp is a Repeating Group
-        // Here the initial value is set up 
-        // This is only required for non-optional values
-        // But is valid for any field within the group
-        UndInstrmtGrp: UndInstrmtGrp = {
-            NoUnderlyings = Some 4;
-            UnderlyingInstrument = {
-                UnderlyingSymbol = Some "a";
-                UndSecAltIDGrp = {
-                    UnderlyingSecurityAltIDSource = Some "d";
-                };
-                UnderlyingStipulations = {
-                    NoUnderlyingStips  = Some 5;
-                    UnderlyingStipType = Some "e";
-                };
-            };
-        };
+        UndInstrmtGrp: UndInstrmtGrp 
 
         // CFICode is a field within a component block.
         // It is imported in messages both optionally and as a required field
