@@ -10,5 +10,5 @@ Welcome to Imandra Protocol Language examples repo.
 - `ambiguousOptionalityComplex.ipl` -Complex treatment of ambiguous type fields
 - `sentFieldsRecordComplete.ipl` - Setting sent fields using an internal record (successfully)
 - `sentFieldsRecordIncomplete.ipl` - Setting sent fields using an internal record requiring addition explicit "with" statements.
-- `ordersWithFillsAssignableRecord.ipl` - Setting sent fields using assignable records.
+- `sentFieldsRecordAssignable.ipl` - Setting sent fields using assignable records.
 - `ordersOnlyExplicit.ipl` - Example of importing a message explicitly from a different library.
