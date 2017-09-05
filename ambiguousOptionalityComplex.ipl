@@ -2,8 +2,9 @@
 //  Aesthetic Integration Limited
 //  Copyright (c) 2014 - 2017
 //
-//  Minimal FIX 4.4 model with fills
-//   
+//  Minimal FIX 4.4 model complex treatment
+//  of ambiguous type fields  
+//
 //  For further info see https://docs.imandra.ai
 // 
 // 
@@ -95,7 +96,7 @@ receive ( msg : NewOrderSingle ) {
         tPambig = case(tPopt){None:tPambig}{Some x: x}
     }
     // this is not allowed - the optionality is different
-    //if (tp == tPopt) then return
+    // if (tp == tPopt) then return
 
 
 
@@ -111,112 +112,13 @@ receive ( msg : NewOrderSingle ) {
         then Some state.temp_Price 
         else None
 
+    // here we override the existing Price assignment in the assignable
+    // section of state with one from our local ambiguous variable
     send ExecutionReport {
         state with 
             ExecID = "";
             ExecType = ExecType.New;
+            Price = tPambig;
     }
     
 }
-
-// Handle rejections for 'NewOrderSingle'
-reject ( msg : NewOrderSingle, rejectReason : string ) {
-
-    // A field is missing 
-    missingfield : {
-         send ExecutionReport {
-            state with
-                ExecID = "";
-                ExecType = ExecType.Rejected;
-        }
-    }
-    
-    invalidfield : {
-        send ExecutionReport {
-            state with
-                ExecID = "";
-                ExecType = ExecType.Rejected;
-        }    
-    }
-    
-    // One or more 'validate' statements is invalid
-    invalid : {
-        send ExecutionReport {
-            state with
-                ExecID = "";
-                ExecType = ExecType.Rejected;
-        }
-   }
-}
-
-// Define action 'time_change'
-action time_change {
-    new_time : UTCTimeOnly
-    
-    validate { this.new_time <= state.closing_time }
-
-    validate { this.new_time >= state.current_time && state.OrdStatus == OrdStatus.New }
-}
-
-// Define logic for handling this 'time_change' action
-receive ( act : time_change ) {
-    // Save the new time into internal state
-    state.current_time = act.new_time
-
-    // If it's past closing time, then cancel the order and send
-    // out the ExecutionReport
-    if ( act.new_time >= state.closing_time) then {
-        state.OrdStatus = OrdStatus.Expired
-        state.live_order = false
-        
-        send ExecutionReport {
-            state with 
-                ExecID = "";
-                ExecType = ExecType.New;
-        }
-    }
-}
-
-//
-// Define action 'fill'
-//
-action fill {
-
-	fill_time : UTCTimeOnly
-    fill_price : Price
-    fill_qty : Qty
-
-    validate { this.fill_qty > 0.0 && this.fill_qty < state.LeavesQty }
-
-    validate { this.fill_price > 0.0 && ( 
-				 state.OrdType == OrdType.Limit ) ==> 
-        				( case state.Price 
-        					{ Some p:
-        						if ( state.Side == Side.Buy ) then
-        							( this.fill_price <= p )
-        						else ( this.fill_price >= p ) } 
-        					{ None: true } ) 
-            }
-
-}
-
-// Receiving fills and sending out 
-receive ( f : fill ) {
-
-    state.LeavesQty = state.LeavesQty - f.fill_qty
-    state.filledQty = state.filledQty + f.fill_qty
-        
-    state.AvgPx = ( state.AvgPx * state.filledQty + f.fill_qty * f.fill_price ) / ( f.fill_qty + state.filledQty )
-
-
-    if state.LeavesQty == 0.0 then 
-        state.OrdStatus = OrdStatus.Filled
-    else 
-        state.OrdStatus = OrdStatus.PartiallyFilled
-        
-    send ExecutionReport { state with 
-        ExecID = "";
-        ExecType = ExecType.New;
-    }
-}
-    

@@ -2,8 +2,9 @@
 //  Aesthetic Integration Limited
 //  Copyright (c) 2014 - 2017
 //
-//  Minimal FIX 4.4 model assigning sent fields
-//  from a defined assignable record
+//  Minimal FIX 4.4 model with receive logic using
+//  a defined internal record to set "sent fields" 
+//  
 //   
 //  For further info see https://docs.imandra.ai
 // 
@@ -19,7 +20,7 @@ message NewOrderSingle {
     req Side
     req TransactTime
     req OrdType valid when it in [ OrdType.Limit, OrdType.Market ]
-    opt OrderQtyData.OrderQty default = Some 0.0
+    req OrderQtyData.OrderQty
     opt Price
 
 	validate { state.live_order == false } 
@@ -53,10 +54,6 @@ internal state {
         AvgPx       : Price = 0.0;
         Price 		:? Price = None;
         OrdType		: OrdType = OrdType.Limit;
-        // assignable record
-        OrderQtyData :* OrderQtyData = {
-            OrderQty = 0.0;
-        };
     }
     
     live_order : bool = false;
@@ -70,7 +67,11 @@ internal state {
     opening_time : UTCTimeOnly = UTCTimeOnly (8, 0, 0, None);
     closing_time : UTCTimeOnly = UTCTimeOnly (16, 0, 0, None);
 
-   
+    //internal records
+    OrderQtyData : OrderQtyData = {
+        CashOrderQty = None;
+        OrderQty = Some 0.0;
+    };
 }
 
 
@@ -87,7 +88,14 @@ receive ( msg : NewOrderSingle ) {
     send ExecutionReport {
         state with 
             ExecID = "";
-            ExecType = ExecType.New;        
+            ExecType = ExecType.New;
+            // assignment to an entire record which is allowed
+            // but in this case does not fill the field
+            // OrderQtyData.OrderQty as it is required, but optional in the record
+            OrderQtyData = state.OrderQtyData;
+            // thus we still need to set this value to something in order to fulfil the requirement
+            // that all the required fields are set
+            OrderQtyData.OrderQty = state.CumQty;
     }
     
 }
