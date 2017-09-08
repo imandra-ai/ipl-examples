@@ -2,15 +2,13 @@
 //  Aesthetic Integration Limited
 //  Copyright (c) 2014 - 2017
 //
-//  Minimal FIX 4.4 model with explicit import
-//   
+//  Minimal FIX 4.4 model with explicit import from 4.2
+//
 //  For further info see https://docs.imandra.ai
 // 
 
 imandramarkets: 1.0.0
 import FIX_4_4
-
-test error text!
 
 // Import an explicitly reference message from another Library
 message FIX_4_2.OrderSingle {

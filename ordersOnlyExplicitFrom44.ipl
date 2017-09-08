@@ -2,18 +2,16 @@
 //  Aesthetic Integration Limited
 //  Copyright (c) 2014 - 2017
 //
-//  Minimal FIX 4.4 model with explicit import
+//  Minimal FIX 4.2 model with explicit import from 4.4
 //   
 //  For further info see https://docs.imandra.ai
 // 
 
 imandramarkets: 1.0.0
-import FIX_4_4
-
-test error text!
+import FIX_4_2
 
 // Import an explicitly reference message from another Library
-message FIX_4_2.OrderSingle {
+message FIX_4_4.NewOrderSingle {
     req ClOrdID
     // Side can reference the union of values from 4.2 and 4.4
     // such as Redeem
@@ -21,7 +19,7 @@ message FIX_4_2.OrderSingle {
     req TransactTime
     req OrdType valid when it in [ OrdType.Limit, OrdType.Market ]
     req HandlInst
-    req Symbol
+   
 
 	validate { state.live_order == false  }
 }
@@ -34,10 +32,14 @@ outbound message ExecutionReport {
     req ExecID
     req ExecType
     req OrdStatus
-    req Side
+    // note how Side includes enum values from the 4.4 dictionary
+    // as we have an explicit import 
+    req Side valid when it != Side.Redeem
     req LeavesQty
     req CumQty
     req AvgPx
+    req ExecTransType
+    req Symbol
 }
 
 // Define our internal state
@@ -64,7 +66,7 @@ internal state {
 }
 
    
-receive (msg:FIX_4_2.OrderSingle){
+receive (msg:FIX_4_4.NewOrderSingle){
 
     // Extract all relevant fields from within the message
     assignFrom (msg, state)
@@ -76,6 +78,8 @@ receive (msg:FIX_4_2.OrderSingle){
             ExecID = "";
             OrderID = msg.ClOrdID;
             ExecType = ExecType.New;
+            ExecTransType = ExecTransType.New;
+            Symbol = "";
             // override Side with a new value
             // this can come from the union of Side values
             // from 4.2 or 4.4

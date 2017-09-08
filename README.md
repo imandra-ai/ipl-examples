@@ -11,4 +11,5 @@ Welcome to Imandra Protocol Language examples repo.
 - `sentFieldsRecordComplete.ipl` - Setting sent fields using an internal record (successfully)
 - `sentFieldsRecordIncomplete.ipl` - Setting sent fields using an internal record requiring addition explicit "with" statements.
 - `sentFieldsRecordAssignable.ipl` - Setting sent fields using assignable records.
-- `ordersOnlyExplicit.ipl` - Example of importing a message explicitly from a different library.
+- `ordersOnlyExplicitFrom42.ipl` - FIX 4.4 Example of importing a message explicitly from 4.2
+- `ordersOnlyExplicitFrom44.ipl` - FIX 4.2 Example of importing a message explicitly from 4.4
