@@ -50,7 +50,7 @@ internal state {
     assignable {
         OrdStatus   : OrdStatus = OrdStatus.New;
         Side        : Side = Side.Buy;
-        OrderID     : String = "";
+        OrderID     : string = "";
         LeavesQty   : Qty = 0.0;
         CumQty      : Qty = 0.0;
         AvgPx       : Price = 0.0;       

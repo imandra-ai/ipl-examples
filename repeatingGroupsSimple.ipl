@@ -15,9 +15,9 @@ internal state {
     assignable {        
         Side : Side = Side.Buy;
         AccountType :? AccountType
-        Account :* String = "";
-        OrderID: String = "";
-        ExecID: String = "";
+        Account :* string = "";
+        OrderID: string = "";
+        ExecID: string = "";
         ExecType:ExecType = ExecType.Trade;
         LeavesQty:Qty = 0.0;
         CumQty:Qty = 0.0;
