@@ -55,6 +55,10 @@ outbound message ExecutionReport {
         valid when it.UnderlyingInstrument.UndSecAltIDGrp.UnderlyingSecurityAltIDSource == (Some "d")
     // for elements of component blocks, each one must be explicitly imported
     opt Instrument.CFICode valid when it == (Some "")
+
+    validate{this.UndInstrmtGrp.UnderlyingInstrument.EncodedUnderlyingIssuer == this.UndInstrmtGrp.UnderlyingInstrument.UndSecAltIDGrp.UnderlyingSecurityAltIDSource &&
+    this.UndInstrmtGrp.UnderlyingInstrument.EncodedUnderlyingIssuer in ["a","b","c"]}
+
     
 }
 
