@@ -7,6 +7,7 @@ Welcome to Imandra Protocol Language examples repo.
 - `repeatingGroupsSimple.ipl` - Example of repeating groups usage
 - `repeatingGroupsComplex.ipl` - Implicit foralls in validate statements for repeating groups
 - `importedOptionaField.ipl` - Example optional treatment of imported optional value
+- `ordersOnlyCustomMessage.ipl` - Example message extension with enum extension
 - `ambiguousOptionalitySimple.ipl` - Example with minimal example optional and ambiguous import logic 
 - `ambiguousOptionalityComplex.ipl` - Complex treatment of ambiguous type fields
 - `sentFieldsRecordComplete.ipl` - Setting sent fields using an internal record (successfully)
