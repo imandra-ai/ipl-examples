@@ -169,14 +169,15 @@ action fill {
     validate { this.fill_qty > 0.0 && this.fill_qty <= state.LeavesQty }
 
     validate { this.fill_price > 0.0 && (
-         state.OrdType == OrdType.Limit ) ==>
+         (state.OrdType == OrdType.Limit ) ==>
                 ( case state.Price
                   { Some p:
                     if ( state.Side == Side.Buy ) then
                       ( this.fill_price <= p )
                     else ( this.fill_price >= p ) }
                   { None: true } )
-            }
+         )
+    }
 
 }
 
