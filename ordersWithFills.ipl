@@ -136,7 +136,7 @@ action time_change {
 
     validate { this.new_time <= state.closing_time }
 
-    validate { this.new_time >= state.current_time && state.OrdStatus == OrdStatus.New }
+    validate { this.new_time >= state.current_time }
 }
 
 // Define logic for handling this 'time_change' action
@@ -146,7 +146,7 @@ receive ( act : time_change ) {
 
     // If it's past closing time, then cancel the order and send
     // out the ExecutionReport
-    if ( act.new_time >= state.closing_time) then {
+    if ( act.new_time >= state.closing_time && state.OrdStatus != OrdStatus.Filled ) then {
         state.OrdStatus = OrdStatus.Expired
         state.live_order = false
 
