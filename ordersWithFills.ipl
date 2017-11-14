@@ -89,6 +89,7 @@ receive ( msg : NewOrderSingle ) {
     // Extract all relevant fields from within the message
     assignFrom (msg, state)
 
+    state.LeavesQty = msg.OrderQtyData.OrderQty
     state.live_order = true
 
     send ExecutionReport {
