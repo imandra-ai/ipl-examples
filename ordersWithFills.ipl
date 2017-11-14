@@ -66,12 +66,14 @@ internal state {
         AvgPx       : Price = 0.0;
         Price       :? Price = None;
         OrdType     : OrdType = OrdType.Limit;
+        OrderQtyData: OrderQtyData = {
+            OrderQty = 0.0;
+        };
     }
 
     live_order : bool = false;
 
     // These are not required within the orders, etc...
-    OrdQty : Qty = 0.0;
     filledQty : Qty = 0.0;
     current_time : UTCTimeOnly = UTCTimeOnly (8, 0, 0, None);
 
