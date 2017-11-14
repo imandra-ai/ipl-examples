@@ -163,7 +163,6 @@ receive ( act : time_change ) {
 //
 action fill {
 
-  fill_time : UTCTimeOnly
     fill_price : Price
     fill_qty : Qty
 
