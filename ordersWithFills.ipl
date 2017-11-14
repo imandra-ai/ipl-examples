@@ -3,10 +3,10 @@
 //  Copyright (c) 2014 - 2017
 //
 //  Minimal FIX 4.4 model with fills
-//   
+//
 //  For further info see https://docs.imandra.ai
-// 
-// 
+//
+//
 
 imandramarkets: 1.0.0
 import FIX_4_4
@@ -18,12 +18,27 @@ message NewOrderSingle {
     req Side
     req TransactTime
     req OrdType valid when it in [ OrdType.Limit, OrdType.Market ]
-    req OrderQtyData.OrderQty
+    req OrderQtyData.OrderQty valid when it > 0.0
     opt Price
 
-	validate { state.live_order == false } 
-	
-	validate { state.OrdStatus in [ OrdStatus.New ]}
+    validate { state.live_order == false }
+
+    validate { state.OrdStatus in [ OrdStatus.New ]}
+
+    // For Limit orders, Price must be positive.
+    validate {
+         this.OrdType == OrdType.Limit ==>
+                (case this.Price
+                    {Some price: price > 0.0}
+                    {None: false}
+                 )
+    }
+
+
+    // For Market orders, Price must not be present.
+    validate {
+         this.OrdType == OrdType.Market ==> !present(this.Price)
+    }
 }
 
 // Import an outbound message ExecutionReport
@@ -36,13 +51,12 @@ outbound message ExecutionReport {
     req LeavesQty
     req CumQty
     req AvgPx
-
 }
 
 // Define the interface state
 internal state {
 
-    // The following fields would be assigned to 
+    // The following fields would be assigned to
     assignable {
         OrdStatus   : OrdStatus = OrdStatus.New;
         Side        : Side = Side.Buy;
@@ -50,45 +64,46 @@ internal state {
         LeavesQty   : Qty = 0.0;
         CumQty      : Qty = 0.0;
         AvgPx       : Price = 0.0;
-        Price 		:? Price = None;
-        OrdType		: OrdType = OrdType.Limit;
+        Price       :? Price = None;
+        OrdType     : OrdType = OrdType.Limit;
+        OrderQtyData: OrderQtyData = {
+            OrderQty = 0.0;
+        };
     }
-    
+
     live_order : bool = false;
-    
+
     // These are not required within the orders, etc...
-    OrdQty : Qty = 0.0;
     filledQty : Qty = 0.0;
     current_time : UTCTimeOnly = UTCTimeOnly (8, 0, 0, None);
-    
+
     // Define the opening and closing times
     opening_time : UTCTimeOnly = UTCTimeOnly (8, 0, 0, None);
     closing_time : UTCTimeOnly = UTCTimeOnly (16, 0, 0, None);
 }
 
-
 //  Define how the model should process a validated
 //  incoming NewOrderSingle message
 receive ( msg : NewOrderSingle ) {
-	
 
     // Extract all relevant fields from within the message
     assignFrom (msg, state)
-    
+
+    state.LeavesQty = msg.OrderQtyData.OrderQty
     state.live_order = true
-    
+
     send ExecutionReport {
-        state with 
+        state with
             ExecID = "";
             ExecType = ExecType.New;
     }
-    
+
 }
 
 // Handle rejections for 'NewOrderSingle'
 reject ( msg : NewOrderSingle, rejectReason : string ) {
 
-    // A field is missing 
+    // A field is missing
     missingfield : {
          send ExecutionReport {
             state with
@@ -96,15 +111,15 @@ reject ( msg : NewOrderSingle, rejectReason : string ) {
                 ExecType = ExecType.Rejected;
         }
     }
-    
+
     invalidfield : {
         send ExecutionReport {
             state with
                 ExecID = "";
                 ExecType = ExecType.Rejected;
-        }    
+        }
     }
-    
+
     // One or more 'validate' statements is invalid
     invalid : {
         send ExecutionReport {
@@ -118,10 +133,10 @@ reject ( msg : NewOrderSingle, rejectReason : string ) {
 // Define action 'time_change'
 action time_change {
     new_time : UTCTimeOnly
-    
+
     validate { this.new_time <= state.closing_time }
 
-    validate { this.new_time >= state.current_time && state.OrdStatus == OrdStatus.New }
+    validate { this.new_time >= state.current_time }
 }
 
 // Define logic for handling this 'time_change' action
@@ -131,12 +146,12 @@ receive ( act : time_change ) {
 
     // If it's past closing time, then cancel the order and send
     // out the ExecutionReport
-    if ( act.new_time >= state.closing_time) then {
+    if ( act.new_time >= state.closing_time && state.OrdStatus != OrdStatus.Filled ) then {
         state.OrdStatus = OrdStatus.Expired
         state.live_order = false
-        
+
         send ExecutionReport {
-            state with 
+            state with
                 ExecID = "";
                 ExecType = ExecType.New;
         }
@@ -148,41 +163,42 @@ receive ( act : time_change ) {
 //
 action fill {
 
-	fill_time : UTCTimeOnly
     fill_price : Price
     fill_qty : Qty
 
-    validate { this.fill_qty > 0.0 && this.fill_qty < state.LeavesQty }
+    validate { this.fill_qty > 0.0 && this.fill_qty <= state.LeavesQty }
 
-    validate { this.fill_price > 0.0 && ( 
-				 state.OrdType == OrdType.Limit ) ==> 
-        				( case state.Price 
-        					{ Some p:
-        						if ( state.Side == Side.Buy ) then
-        							( this.fill_price <= p )
-        						else ( this.fill_price >= p ) } 
-        					{ None: true } ) 
-            }
+    validate { this.fill_price > 0.0 }
+
+    validate {
+        (state.OrdType == OrdType.Limit) ==>
+        ( case state.Price
+              { Some p:
+                    if ( state.Side == Side.Buy ) then
+                        ( this.fill_price <= p )
+                    else ( this.fill_price >= p )
+              }
+              { None: true }
+        )
+    }
 
 }
 
-// Receiving fills and sending out 
+// Receiving fills and sending out
 receive ( f : fill ) {
 
     state.LeavesQty = state.LeavesQty - f.fill_qty
     state.filledQty = state.filledQty + f.fill_qty
-        
+
     state.AvgPx = ( state.AvgPx * state.filledQty + f.fill_qty * f.fill_price ) / ( f.fill_qty + state.filledQty )
 
-
-    if state.LeavesQty == 0.0 then 
+    if state.LeavesQty == 0.0 then
         state.OrdStatus = OrdStatus.Filled
-    else 
+    else
         state.OrdStatus = OrdStatus.PartiallyFilled
-        
-    send ExecutionReport { state with 
+
+    send ExecutionReport { state with
         ExecID = "";
         ExecType = ExecType.New;
     }
 }
-    
