@@ -24,6 +24,21 @@ message NewOrderSingle {
     validate { state.live_order == false }
 
     validate { state.OrdStatus in [ OrdStatus.New ]}
+
+    // For Limit orders, Price must be positive.
+    validate {
+         this.OrdType == OrdType.Limit ==>
+                (case this.Price
+                    {Some price: price > 0.0}
+                    {None: false}
+                 )
+    }
+
+
+    // For Market orders, Price must not be present.
+    validate {
+         this.OrdType == OrdType.Market ==> !present(this.Price)
+    }
 }
 
 // Import an outbound message ExecutionReport
