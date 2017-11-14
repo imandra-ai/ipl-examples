@@ -166,7 +166,7 @@ action fill {
     fill_price : Price
     fill_qty : Qty
 
-    validate { this.fill_qty > 0.0 && this.fill_qty < state.LeavesQty }
+    validate { this.fill_qty > 0.0 && this.fill_qty <= state.LeavesQty }
 
     validate { this.fill_price > 0.0 && (
          state.OrdType == OrdType.Limit ) ==>
