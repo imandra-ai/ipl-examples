@@ -54,9 +54,7 @@ internal state {
         Price 		:? Price = None;
         OrdType		: OrdType = OrdType.Limit;
         // assignable record
-        OrderQtyData :* OrderQtyData = {
-            OrderQty = 0.0;
-        };
+        OrderQtyData.OrderQty :* float = 0.0; 
     }
     
     live_order : bool = false;

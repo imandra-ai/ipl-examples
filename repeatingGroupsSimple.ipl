@@ -29,9 +29,7 @@ internal state {
         // CFICode is a field within a component block.
         // It is imported in messages both optionally and as a required field
         // thus it has the ':*' annotation
-        Instrument :* Instrument = {
-            CFICode = "1";
-        };
+        Instrument.CFICode :* string = "";
    }
 
 }
