@@ -9,6 +9,7 @@
 
 imandramarkets: 1.0.0
 import FIX_4_4
+import FIX_4_2
 
 // Import an explicitly reference message from another Library
 message FIX_4_2.OrderSingle {
