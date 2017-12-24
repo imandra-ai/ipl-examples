@@ -89,7 +89,7 @@ receive ( msg : NewOrderSingle ) {
             ExecType = ExecType.New;
             // assignment to an entire record which is allowed
             // in this case optionality matches so we can assign
-            OrderQtyData = state.OrderQtyData;
+            OrderQtyData.OrderQty = state.OrderQtyData.OrderQty;
             
     }
     

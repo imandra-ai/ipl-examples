@@ -89,10 +89,6 @@ receive ( msg : NewOrderSingle ) {
         state with 
             ExecID = "";
             ExecType = ExecType.New;
-            // assignment to an entire record which is allowed
-            // but in this case does not fill the field
-            // OrderQtyData.OrderQty as it is required, but optional in the record
-            OrderQtyData = state.OrderQtyData;
             // thus we still need to set this value to something in order to fulfil the requirement
             // that all the required fields are set
             OrderQtyData.OrderQty = state.CumQty;
