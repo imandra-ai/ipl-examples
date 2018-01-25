@@ -172,12 +172,12 @@ receive (msg:NewOrderSingle) {
     assignFrom(msg,state)
 
     if msg.OrdType == StopSpread
-    then {
-        let x = case(msg.SpreadProportion){None:0.0}{Some x: x}
+    then 
+        case (msg.SpreadProportion){Some x: 
         if x >= (state.bestBid - state.bestAsk)/state.bestBid
             then state.OrdStatus = OrdStatus.New 
-            else state.OrdStatus = OrdStatus.PendingNew
-    }
+            else state.OrdStatus = OrdStatus.PendingNew}
+    
 
      send ExecutionReport {state with 
         OrderID = msg.ClOrdID;
