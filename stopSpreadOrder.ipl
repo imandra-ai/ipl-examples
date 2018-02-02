@@ -4,7 +4,6 @@ import FIX_4_4
 scenario NewOrderFill {
 	name "NewOrderFill"
 	description "Initialise Book State, send NewOrderSingle Message then receive a fill action"
-	focusOn NewOrderSingle
 	events[bookState, NewOrderSingle, fill]
 }
 
