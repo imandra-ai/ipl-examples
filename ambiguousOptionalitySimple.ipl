@@ -49,11 +49,11 @@ internal state {
     // The following fields would be assigned to 
     assignable {
         OrdStatus   : OrdStatus = OrdStatus.New;
-        Side        : Side = Side.Buy;
-        OrderID     : string = "";
-        LeavesQty   : Qty = 0.0;
-        CumQty      : Qty = 0.0;
-        AvgPx       : Price = 0.0;      
+        Side        : Side 
+        OrderID     : string 
+        LeavesQty   : Qty 
+        CumQty      : Qty 
+        AvgPx       : Price 
         // Price is imported optionally and non-optionally
         // It can be used in assignable and has "ambiguous type (:*)"
         // which means it can only be set using a non-optional value 

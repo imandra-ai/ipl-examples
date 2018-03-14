@@ -48,13 +48,13 @@ internal state {
     // The following fields would be assigned to 
     assignable {
         OrdStatus   : OrdStatus = OrdStatus.New;
-        Side        : Side = Side.Buy;
-        OrderID     : string = "";
-        LeavesQty   : Qty = 0.0;
-        CumQty      : Qty = 0.0;
-        AvgPx       : Price = 0.0;       
+        Side        : Side
+        OrderID     : string 
+        LeavesQty   : Qty
+        CumQty      : Qty 
+        AvgPx       : Price    
         Price 		:* Price = 0.0;
-        OrdType		: OrdType = OrdType.Limit;
+        OrdType		: OrdType 
         DayAvgPx    :? Price
 
     }

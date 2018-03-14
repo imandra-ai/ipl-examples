@@ -13,7 +13,7 @@ internal state {
     assignable{
         Side:Side = Side.Buy;
         Price:?Price
-        OrderQtyData.OrderQty : float = 0.0;
+        OrderQtyData.OrderQty : Qty = 0.0;
         OrdStatus:OrdStatus = OrdStatus.New;
         OrdType:OrdType = OrdType.Market;
         LeavesQty:Qty = 0.0;
