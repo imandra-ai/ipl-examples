@@ -52,7 +52,7 @@ extend message ExecutionReport {
 
 // can extend Enum also
 extend enum OrdStatus {
-    newCase "nc"
+    newCase "n"
 }
 
 // Define our internal state
