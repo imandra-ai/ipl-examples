@@ -15,4 +15,5 @@ Welcome to Imandra Protocol Language examples repo.
 - [sentFieldsRecordAssignable.ipl](sentFieldsRecordAssignable.ipl) - Setting sent fields using assignable records.
 - [ordersOnlyExplicitFrom42.ipl](ordersOnlyExplicitFrom42.ipl) - FIX 4.4 Example of importing a message explicitly from 4.2
 - [ordersOnlyExplicitFrom44.ipl](ordersOnlyExplicitFrom44.ipl) - FIX 4.2 Example of importing a message explicitly from 4.4
+- [ordersWithFillsOverride.ipl](ordersWithFillsOverride.ipl) - Example with a field from the library with an overridden type
 - [stopSpreadOrder.ipl](stopSpreadOrder.ipl) - FIX 4.4 Example of a new order type from the tutorial [here](https://docs.imandra.ai/ipl/tutorials/)
