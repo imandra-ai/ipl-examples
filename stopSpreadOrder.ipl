@@ -1,4 +1,3 @@
-imandramarkets: 0.0.1
 import FIX_4_4
 
 scenario NewOrderFill {
