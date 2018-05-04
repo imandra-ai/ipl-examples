@@ -1,0 +1,92 @@
+import FIX_4_4
+
+scenario NewOrderOnly {
+	name "NewOrderOnly"
+	description "Send NewOrderSingle Message"
+	events[NewOrderSingle]
+}
+
+internal state {
+    assignable{
+        Side:Side 
+        Price:?Price
+        OrderQtyData.OrderQty : Qty 
+        OrdType:OrdType 
+        OrdStatus:OrdStatus = OrdStatus.New;
+        LeavesQty:Qty
+        CumQty:Qty
+    }
+    live_order : bool = false;
+    AvgPx : float
+    bestBid : float 
+    bestAsk : float 
+}
+
+
+message NewOrderSingle {
+    req ClOrdID
+    req Side
+    req TransactTime
+    req OrdType valid when it in [ OrdType.Limit, OrdType.Market ]
+    req OrderQtyData.OrderQty
+    opt Price
+    ign Account
+
+     validate {
+         (this.OrdType == OrdType.Market <==> !present(this.Price)) &&
+         (this.OrdType == OrdType.Limit ==> present(this.Price))
+    }
+
+    validate {
+         this.OrdType == OrdType.Limit ==>
+                (case this.Price
+                    {Some price: price > 0.0}
+                    {None: false}
+                 )
+    }
+}
+
+outbound message ExecutionReport {
+    req OrderID
+    req ExecID
+    req ExecType
+    req OrdStatus
+    req Side
+    req OrderQtyData.OrderQty
+    req LeavesQty
+    req CumQty
+    opt Text
+}
+
+receive (msg:NewOrderSingle){
+    state.live_order = true
+    state.LeavesQty = msg.OrderQtyData.OrderQty
+    assignFrom(msg,state)
+
+     send ExecutionReport {state with 
+        OrderID = msg.ClOrdID;
+        ExecID = "";
+        ExecType = ExecType.New;
+    }
+}
+
+reject (msg:NewOrderSingle, text:string){
+    missingfield:{
+        send ExecutionReport {state with
+            OrderID = "";
+            ExecID = "";
+            ExecType = ExecType.New;
+            Text = Some text;
+        }
+    }
+    invalidfield:{
+         send ExecutionReport {state with
+            OrderID = msg.ClOrdID;
+            ExecID = "";
+            ExecType = ExecType.New;
+            Text = Some text;
+        }
+    }
+    invalid:{
+    }
+}

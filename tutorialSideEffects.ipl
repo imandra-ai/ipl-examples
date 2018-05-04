@@ -1,0 +1,30 @@
+import FIX_4_2
+import FIX_4_4
+
+scenario NewOrderOnly {
+	name "OrderOnly"
+	description "Send OrderSingle Message"
+	events[OrderSingle]
+}
+
+internal state {
+    assignable {
+        Side : Side = Side.Buy;
+        
+    }
+}
+
+declare record myRecord {
+    IDSource "22" : IDSource
+}
+
+message OrderSingle {
+    req Side
+    req IDSource
+}
+
+message FIX_4_4.ExecutionReport {
+    req Side
+    req PeggedPrice
+    req Instrument.SecurityIDSource
+}

@@ -13,7 +13,13 @@ Welcome to Imandra Protocol Language examples repo.
 - [sentFieldsRecordComplete.ipl](sentFieldsRecordComplete.ipl) - Setting sent fields using an internal record (successfully)
 - [sentFieldsRecordIncomplete.ipl](sentFieldsRecordIncomplete.ipl) - Setting sent fields using an internal record requiring addition explicit "with" statements
 - [sentFieldsRecordAssignable.ipl](sentFieldsRecordAssignable.ipl) - Setting sent fields using assignable records.
-- [ordersOnlyExplicitFrom42.ipl](ordersOnlyExplicitFrom42.ipl) - FIX 4.4 Example of importing a message explicitly from 4.2
-- [ordersOnlyExplicitFrom44.ipl](ordersOnlyExplicitFrom44.ipl) - FIX 4.2 Example of importing a message explicitly from 4.4
+- [ordersOnlyExplicitFrom42.ipl](ordersOnlyExplicitFrom42.ipl) - FIX 4.4 example of importing a message explicitly from 4.2
+- [ordersOnlyExplicitFrom44.ipl](ordersOnlyExplicitFrom44.ipl) - FIX 4.2 example of importing a message explicitly from 4.4
 - [ordersWithFillsOverride.ipl](ordersWithFillsOverride.ipl) - Example with a field from the library with an overridden type
-- [stopSpreadOrder.ipl](stopSpreadOrder.ipl) - FIX 4.4 Example of a new order type from the tutorial [here](https://docs.imandra.ai/ipl/tutorials/)
+- [tutorialActions.ipl](tutorialActions.ipl) - Example of introducing actions from the tutorial [here](https://docs.imandra.ai/ipl/tutorialActions/)
+- [tutorialAdvanced.ipl](tutorialAdvanced.ipl) - Full example from the tutorial [here](https://docs.imandra.ai/ipl/tutorialAdvanced/)
+- [tutorialBasic.ipl](tutorialBasic.ipl) - Example from the tutorial [here](https://docs.imandra.ai/ipl/tutorialBasic/)
+- [tutorialCustom.ipl](tutorialCustom.ipl) - Example of introducing custom extenions from the tutorial [here](https://docs.imandra.ai/ipl/tutorialCustom/)
+- [tutorialRepeating.ipl](tutorialRepeating.ipl) - Example of repeating groups from the tutorial [here](https://docs.imandra.ai/ipl/tutorialRepeatingGroups)
+- [tutorialSideEffects.ipl](tutorialSideEffects.ipl) - Example of multiple imports from the tutorial [here](https://docs.imandra.ai/ipl/tutorialSideEffects)
+- [tutorialState.ipl](tutorialState.ipl) - Example of introducing state from th tutorial [here](https://docs.imandra.ai/ipl/tutorialState)

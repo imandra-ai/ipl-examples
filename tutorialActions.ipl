@@ -2,11 +2,9 @@ import FIX_4_4
 
 scenario NewOrderFill {
 	name "NewOrderFill"
-	description "Initialise Book State, send NewOrderSingle Message then receive a fill action"
-	events[bookState, NewOrderSingle, fill]
+	description "Send NewOrderSingle Message then receive a fill action"
+	events[NewOrderSingle, fill]
 }
-
-VerificationPacks[EmptyString,Venue]
 
 internal state {
     assignable{
@@ -17,9 +15,6 @@ internal state {
         OrdType:OrdType = OrdType.Market;
         LeavesQty:Qty = 0.0;
         CumQty:Qty = 0.0;
-        SpreadProportion:?float
-        Parties:Parties
-        ExecInst :* ExecInst = Held;
     }
     live_order : bool = false;
     AvgPx : float = 0.0;
@@ -27,54 +22,28 @@ internal state {
     bestAsk: Price = 0.0;
 }
 
-extend enum OrdType {
-    StopSpread "s"
-}
-
-extend message NewOrderSingle {
-    SpreadProportion "sp" :? float
-}
-
-extend record Parties {
-    req PartyID
-    PartyIndex "pi" : int
-}
 
 message NewOrderSingle {
     req ClOrdID
     req Side
     req TransactTime
-    req OrdType valid when it in [ OrdType.Limit, OrdType.Market, StopSpread ]
+    req OrdType valid when it in [ OrdType.Limit, OrdType.Market ]
     req OrderQtyData.OrderQty
-    opt SpreadProportion valid when case(it){None:true}{Some x: x>0.0 &&  x<=1.0}
-    opt Price 
+    opt Price
     ign Account
-    opt ExecInst default = Some ExecInst.Held
-    req Parties valid when it.PartyIndex > 0 && it.PartyIndex < 100
-                valid when it.PartyID != ""
-    validate {
-         this.OrdType == OrdType.Market ==> !present(this.Price)
+
+     validate {
+         (this.OrdType == OrdType.Market <==> !present(this.Price)) &&
+         (this.OrdType == OrdType.Limit ==> present(this.Price)) 
     }
 
     validate {
-        this.OrdType == StopSpread ==>
-            present(this.SpreadProportion)
-    }
-
-    validate {
-         this.OrdType == OrdType.Limit || this.OrdType == OrdType.StopSpread ==>
+         this.OrdType == OrdType.Limit ==>
                 (case this.Price
                     {Some price: price > 0.0}
                     {None: false}
                  )
     }
-
-    validate {
-        case(this.Parties.PtysSubGrp.PartySubID)
-            {None:true}
-            {Some x : this.Parties.PartyID != x}
-    }
-
 }
 
 outbound message ExecutionReport {
@@ -87,17 +56,15 @@ outbound message ExecutionReport {
     req LeavesQty
     req CumQty
     opt Text
-    req Parties
-    req ExecInst
 }
 
 action fill {
     fill_price : Price
     fill_qty : Qty
 
-    validate {state.OrdStatus != OrdStatus.PendingNew}
     validate { this.fill_qty > 0.0 }
-    validate { this.fill_price > 0.0 }
+    validate { this.fill_qty <= state.LeavesQty}
+    validate { this.fill_price > 0.0 }   
     validate {
         (state.OrdType == OrdType.Limit) ==>
         ( case state.Price
@@ -112,21 +79,15 @@ action fill {
 }
 
 action bookState {
-    bestBid :? Price
-    bestAsk :? Price
+    bestBid : Price
+    bestAsk : Price
     
     validate{
-        case(this.bestBid)
-            {Some x: x> state.bestBid}
-            {None: true}
-        }
-    validate{
-        case(this.bestAsk)
-            {Some x: x > 0.0 && x< state.bestAsk}
-            {None: true}
+        this.bestAsk > this.bestBid &&
+        this.bestBid > 0.0 &&
+        this.bestAsk > 0.0
         }
 }
-
 
 receive (f:fill) {
     state.LeavesQty = state.LeavesQty - f.fill_qty
@@ -146,36 +107,14 @@ receive (f:fill) {
 }
 
 receive (ba:bookState){
-    state.bestBid = case(ba.bestBid)
-        {Some x:x}
-        {None: state.bestBid}
-    
-
-    state.bestAsk = case(ba.bestAsk)
-        {Some x:x}
-        {None: state.bestAsk}
-
-    let spread = (state.bestBid - state.bestAsk)/state.bestBid
-
-    if 
-        (case(state.SpreadProportion){None:false}{Some x: x >= spread}) &&
-        state.OrdStatus == OrdStatus.PendingNew
-    then {
-        state.OrdStatus = OrdStatus.New
-    }
+    state.bestBid = ba.bestBid
+    state.bestAsk = ba.bestAsk
 }
 
 receive (msg:NewOrderSingle) {
     state.live_order = true
+    state.LeavesQty = msg.OrderQtyData.OrderQty
     assignFrom(msg,state)
-
-    if msg.OrdType == StopSpread
-    then 
-        case (msg.SpreadProportion){Some x: 
-        if x >= (state.bestBid - state.bestAsk)/state.bestBid
-            then state.OrdStatus = OrdStatus.New 
-            else state.OrdStatus = OrdStatus.PendingNew}
-    
 
      send ExecutionReport {state with 
         OrderID = msg.ClOrdID;
