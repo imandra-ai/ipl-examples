@@ -17,9 +17,9 @@ Welcome to Imandra Protocol Language examples repo.
 - [ordersOnlyExplicitFrom44.ipl](ordersOnlyExplicitFrom44.ipl) - FIX 4.2 example of importing a message explicitly from 4.4
 - [ordersWithFillsOverride.ipl](ordersWithFillsOverride.ipl) - Example with a field from the library with an overridden type
 - [tutorialActions.ipl](tutorialActions.ipl) - Example of introducing actions from the tutorial [here](https://docs.imandra.ai/ipl/tutorialActions/)
-- [tutorialAdvanced.ipl](tutorialAdvanced.ipl) - Full example from the tutorial [here](https://docs.imandra.ai/ipl/tutorialAdvanced/)
+- [tutorialAdvanced.ipl](tutorialAdvanced.ipl) - Full example from the tutorial [here](https://docs.imandra.ai/ipl/tutorialAdvanced)
 - [tutorialBasic.ipl](tutorialBasic.ipl) - Example from the tutorial [here](https://docs.imandra.ai/ipl/tutorialBasic/)
-- [tutorialCustom.ipl](tutorialCustom.ipl) - Example of introducing custom extenions from the tutorial [here](https://docs.imandra.ai/ipl/tutorialCustom/)
+- [tutorialCustom.ipl](tutorialCustom.ipl) - Example of introducing custom extenions from the tutorial [here](https://docs.imandra.ai/ipl/tutorialCustom)
 - [tutorialRepeating.ipl](tutorialRepeating.ipl) - Example of repeating groups from the tutorial [here](https://docs.imandra.ai/ipl/tutorialRepeatingGroups)
 - [tutorialSideEffects.ipl](tutorialSideEffects.ipl) - Example of multiple imports from the tutorial [here](https://docs.imandra.ai/ipl/tutorialSideEffects)
 - [tutorialState.ipl](tutorialState.ipl) - Example of introducing state from th tutorial [here](https://docs.imandra.ai/ipl/tutorialState)
