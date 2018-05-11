@@ -42,9 +42,9 @@ message NewOrderSingle {
     ign Account
     opt ExecInst default = Some ExecInst.Held
     validate {
-         this.OrdType == OrdType.Market <==> !present(this.Price) &&
-         this.OrdType == OrdType.Limit ==> present(this.Price) &&
-         this.OrdType == OrdType.StopSpread ==> present(this.Price)
+         (this.OrdType == OrdType.Market <==> !present(this.Price)) &&
+         (this.OrdType == OrdType.Limit ==> present(this.Price)) &&
+         (this.OrdType == OrdType.StopSpread ==> present(this.Price))
     }
 
     validate {
