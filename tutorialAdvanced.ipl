@@ -38,6 +38,7 @@ extend message NewOrderSingle {
 }
 
 extend record Parties {
+    req NoPartyIDs
     req PartyID
     PartyIndex "pi" : int
 }
