@@ -13,7 +13,7 @@ import FIX_4_4
 
 // Import inbound NewOrderSingle message
 message NewOrderSingle {
-    req ClOrdID
+    req ClOrdID valid when it in ["a","n"]
     req Side
     req TransactTime
     req OrdType valid when it in [ OrdType.Limit, OrdType.Market ]
