@@ -22,4 +22,5 @@ Welcome to Imandra Protocol Language examples repo.
 - [tutorialCustom.ipl](tutorialCustom.ipl) - Example of introducing custom extenions from the tutorial [here](https://docs.imandra.ai/ipl/tutorialCustom)
 - [tutorialRepeating.ipl](tutorialRepeating.ipl) - Example of repeating groups from the tutorial [here](https://docs.imandra.ai/ipl/tutorialRepeatingGroups)
 - [tutorialSideEffects.ipl](tutorialSideEffects.ipl) - Example of multiple imports from the tutorial [here](https://docs.imandra.ai/ipl/tutorialSideEffects)
-- [tutorialState.ipl](tutorialState.ipl) - Example of introducing state from th tutorial [here](https://docs.imandra.ai/ipl/tutorialState)
+- [tutorialState.ipl](tutorialState.ipl) - Example of introducing state from the tutorial [here](https://docs.imandra.ai/ipl/tutorialState)
+- [wolfCabbageGoat.ipl](wolfCabbageGoat.ipl) - Example shown [here](https://medium.com/imandra/the-wolf-goat-and-cabbage-exchange-97e7f3ff8d5a)

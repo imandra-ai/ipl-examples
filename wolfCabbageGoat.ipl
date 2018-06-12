@@ -1,0 +1,153 @@
+import FIX_4_4
+
+scenario Events {
+    events[NewOrderSingle,NewOrderSingle,fill,fill,NewOrderSingle,NewOrderSingle,
+    fill,fill,fill,NewOrderSingle,NewOrderSingle,NewOrderSingle,
+    fill,fill,NewOrderSingle,NewOrderSingle,fill]
+}
+
+enum location {
+   LeftCoast
+   RightCoast
+   Boat
+   Eaten
+}
+
+enum act {
+    Pick        "u"
+    Drop        "d"
+    CrossRiver  "c"
+}
+
+enum obj {
+    Cabbage     "c"
+    Goat        "g"
+    Wolf        "w"
+}
+
+internal state  {
+    cabbage : location = LeftCoast;
+    goat    : location = LeftCoast;
+    wolf    : location = LeftCoast;
+    boat    : location = LeftCoast;
+}
+
+extend message NewOrderSingle {
+    obj        "o" :? obj
+    act        "a" : act
+}
+
+extend message ExecutionReport {
+    obj        "o" :? obj
+    act        "a" : act
+}
+
+message NewOrderSingle {
+	opt obj
+	req act
+
+    validate{this.act == CrossRiver <==> !present(this.obj)}
+    validate{state.boat == LeftCoast}
+}
+
+action fill {
+    obj :?obj
+    act : act
+
+    validate{this.act == CrossRiver <==> !present(this.obj)}
+    validate{state.boat == RightCoast}
+}
+
+outbound message ExecutionReport {
+	opt obj
+	req act
+}
+
+receive (f:fill) {
+    if state.cabbage == Eaten || state.goat == Eaten
+    then return
+
+     if (state.cabbage == LeftCoast  && state.goat == LeftCoast)  then
+    {
+        state.cabbage = Eaten
+        return
+    }
+    if (state.goat    == LeftCoast  && state.wolf == LeftCoast)  then
+    {
+        state.goat = Eaten
+        return
+    }
+
+    if f.act == CrossRiver then state.boat = LeftCoast
+    else if f.act == Pick then
+    {
+        if (state.cabbage == Boat || state.goat == Boat || state.wolf == Boat) then return
+
+        let thisObjVal = if f.obj == (Some Cabbage) then state.cabbage
+            else if f.obj == (Some Wolf) then state.wolf else state.goat
+
+        if thisObjVal == RightCoast  then
+        {
+            if f.obj == (Some Cabbage) then state.cabbage = Boat else
+            if f.obj == (Some Wolf)    then state.wolf    = Boat else
+                state.goat  = Boat
+        }
+    }
+    else
+    {
+        let thisObjVal = if f.obj == (Some Cabbage) then state.cabbage
+            else if f.obj == (Some Wolf) then state.wolf else state.goat
+
+        if thisObjVal == Boat then
+        {
+            if f.obj == (Some Cabbage) then state.cabbage = RightCoast
+            else if f.obj == (Some Wolf)    then state.wolf    = RightCoast
+            else state.goat    = RightCoast
+        }
+    }
+}
+
+receive (m:NewOrderSingle){
+     if state.cabbage == Eaten || state.goat == Eaten
+    then return
+
+     if (state.cabbage == RightCoast && state.goat == RightCoast) then
+    {
+        state.cabbage = Eaten
+        return
+    }
+    if (state.goat    == RightCoast && state.wolf == RightCoast) then
+    {
+        state.goat = Eaten
+        return
+    }
+
+    if m.act == CrossRiver then state.boat = RightCoast
+    else if m.act == Pick then
+    {
+        if (state.cabbage == Boat || state.goat == Boat || state.wolf == Boat) then return
+
+        let thisObjVal = if m.obj == (Some Cabbage) then state.cabbage
+            else if m.obj == (Some Wolf) then state.wolf else state.goat
+
+        if thisObjVal == LeftCoast then
+        {
+            if m.obj == (Some Cabbage)   then state.cabbage = Boat
+            else if m.obj == (Some Wolf) then state.wolf    = Boat
+            else if m.obj == (Some Goat) then state.goat    = Boat
+        }
+    }
+    else {
+        let thisObjVal = if m.obj == (Some Cabbage) then state.cabbage
+            else if m.obj == (Some Wolf) then state.wolf else state.goat
+
+        if thisObjVal == Boat then
+        {
+            if m.obj == (Some Cabbage)   then state.cabbage = LeftCoast
+            else if m.obj == (Some Wolf) then state.wolf    = LeftCoast
+            else state.goat    = LeftCoast
+        }
+    }
+
+
+}
