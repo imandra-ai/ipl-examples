@@ -46,16 +46,9 @@ outbound message ExecutionReport {
     req AvgPx
     // for repeating groups the whole group is imported and the optionality of field elements
     // is the same for each copy
-    req UndInstrmtGrp 
-        valid when present(it.NoUnderlyings)
-        valid when it.UnderlyingInstrument.EncodedUnderlyingIssuer == (Some "a")
-        valid when it.UnderlyingInstrument.UndSecAltIDGrp.UnderlyingSecurityAltIDSource == (Some "d")
+    req UndInstrmtGrp
     // for elements of component blocks, each one must be explicitly imported
     opt Instrument.CFICode valid when it == (Some "")
-
-    // this is a validate statement which implicitly checks each copy of every repeating group
-    validate{this.UndInstrmtGrp.UnderlyingInstrument.EncodedUnderlyingIssuer == this.UndInstrmtGrp.UnderlyingInstrument.UndSecAltIDGrp.UnderlyingSecurityAltIDSource &&
-    this.UndInstrmtGrp.UnderlyingInstrument.EncodedUnderlyingIssuer in ["a","b","c"]}
 
     
 }
@@ -73,9 +66,17 @@ message NewOrderSingle {
     req ClOrdID
     req Side
     req TransactTime
-    req OrdType  
+    req OrdType valid when it in [OrdType.Limit, OrdType.Market] valid when it != MarketWithLeftOverAsLimit
     req UndInstrmtGrp 
+        valid when present(it.NoUnderlyings)
+        valid when it.UnderlyingInstrument.EncodedUnderlyingIssuer == (Some "a")
+        valid when it.UnderlyingInstrument.UndSecAltIDGrp.UnderlyingSecurityAltIDSource == (Some "d")
+    // for elements of component blocks, each one must be explicitly imported
     req Instrument.CFICode
+
+    // this is a validate statement which implicitly checks each copy of every repeating group
+    validate{this.UndInstrmtGrp.UnderlyingInstrument.EncodedUnderlyingIssuer == this.UndInstrmtGrp.UnderlyingInstrument.UndSecAltIDGrp.UnderlyingSecurityAltIDSource &&
+    this.UndInstrmtGrp.UnderlyingInstrument.EncodedUnderlyingIssuer in ["a","b","c"]}
 }
 
 receive (msg:NewOrderSingle){

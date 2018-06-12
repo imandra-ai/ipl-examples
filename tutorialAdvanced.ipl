@@ -21,7 +21,7 @@ internal state {
         CumQty:Qty 
         SpreadProportion:?float
         Parties:Parties
-        ExecInst :* ExecInst = Held;
+        ExecInst :* ExecInst
     }
     live_order : bool = false;
     AvgPx : float 
@@ -38,6 +38,7 @@ extend message NewOrderSingle {
 }
 
 extend record Parties {
+    req NoPartyIDs
     req PartyID
     PartyIndex "pi" : int
 }
@@ -51,7 +52,7 @@ message NewOrderSingle {
     opt SpreadProportion valid when case(it){None:true}{Some x: x>0.0 &&  x<=1.0}
     opt Price 
     ign Account
-    opt ExecInst default = Some ExecInst.Held
+    opt ExecInst default = Some [ExecInst.Held, ExecInst.AllOrNone]
     req Parties valid when it.PartyIndex > 0 && it.PartyIndex < 100
                 valid when it.PartyID != ""
     validate {
