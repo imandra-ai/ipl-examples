@@ -4,6 +4,7 @@ Welcome to Imandra Protocol Language examples repo.
 
 - [ordersOnly.ipl](ordersOnly.ipl) - Minimal model that accepts/rejects `NewOrderSingle`
 - [ordersWithFills.ipl](ordersWithFills.ipl) - Model accepting/rejecting `NewOrderSingle` messages and generating fills
+- [ordersWithFillsSet.ipl](ordersWithFillsSet.ipl) - as [ordersWithFills.ipl](ordersWithFills.ipl) but with some set reasoning
 - [repeatingGroupsSimple.ipl](repeatingGroupsSimple.ipl) - Example of repeating groups usage
 - [repeatingGroupsComplex.ipl](repeatingGroupsComplex.ipl) - Implicit foralls in validate statements for repeating groups
 - [importedOptionaField.ipl](importedOptionaField.ipl) - Example optional treatment of imported optional value
