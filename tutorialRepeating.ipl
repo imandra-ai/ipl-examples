@@ -1,4 +1,5 @@
 import FIX_4_4
+@title: "Repeating Groups Tutorial Example"
 
 scenario NewOrderFill {
 	name "NewOrderFill"

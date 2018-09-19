@@ -1,4 +1,5 @@
 import FIX_4_4
+@title: "Tutorial Model with Actions"
 
 scenario NewOrderFill {
 	name "NewOrderFill"

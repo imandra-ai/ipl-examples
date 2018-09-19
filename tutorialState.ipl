@@ -1,4 +1,5 @@
 import FIX_4_4
+@title: "Tutorial State Model"
 
 scenario NewOrderOnly {
 	name "NewOrderOnly"

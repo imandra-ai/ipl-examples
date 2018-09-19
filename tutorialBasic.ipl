@@ -1,4 +1,5 @@
 import FIX_4_4
+@title: "Basic Model"
 
 scenario NewOrderOnly {
 	name "NewOrderOnly"
