@@ -77,7 +77,7 @@ receive (msg:FIX_4_2.OrderSingle){
             // override Side with a new value
             // this can come from the union of Side values
             // from 4.2 or 4.4
-            Side  = Side.Redeem;
+            Side  = Side.Redeem
     }
     
 } 

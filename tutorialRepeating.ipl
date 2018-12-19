@@ -137,7 +137,7 @@ receive (f:fill) {
     send ExecutionReport { state with
         OrderID = "";
         ExecID = "";
-        ExecType = ExecType.New;
+        ExecType = ExecType.New
     }
 }
 
@@ -169,7 +169,7 @@ receive (msg:NewOrderSingle) {
      send ExecutionReport {state with 
         OrderID = msg.ClOrdID;
         ExecID = "";
-        ExecType = ExecType.New;
+        ExecType = ExecType.New
     }
 }
 
@@ -179,7 +179,7 @@ reject (msg:NewOrderSingle, text:string){
             OrderID = "";
             ExecID = "";
             ExecType = ExecType.New;
-            Text = Some text;
+            Text = Some text
         }
     }
     invalidfield:{
@@ -187,7 +187,7 @@ reject (msg:NewOrderSingle, text:string){
             OrderID = msg.ClOrdID;
             ExecID = "";
             ExecType = ExecType.New;
-            Text = Some text;
+            Text = Some text
         }
     }
     invalid:{

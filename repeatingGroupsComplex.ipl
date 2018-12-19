@@ -98,7 +98,7 @@ receive (f:fill){
 
     if f.cumQty > state.CumQty then
     // here the "with" assignment overrides any within state
-    send ExecutionReport {state with CumQty = f.cumQty;}
+    send ExecutionReport {state with CumQty = f.cumQty}
     else send ExecutionReport state
 
 }

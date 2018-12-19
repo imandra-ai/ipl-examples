@@ -143,7 +143,7 @@ receive (f:fill) {
     send ExecutionReport { state with
         OrderID = "";
         ExecID = "";
-        ExecType = ExecType.New;
+        ExecType = ExecType.New
     }
 }
 receive (ba:bookState){
@@ -175,7 +175,7 @@ receive (msg:NewOrderSingle) {
      send ExecutionReport {state with 
         OrderID = msg.ClOrdID;
         ExecID = "";
-        ExecType = ExecType.New;
+        ExecType = ExecType.New
     }
 }
 
@@ -186,7 +186,7 @@ reject (msg:NewOrderSingle, text:string){
             ExecID = "unknown order";
             ExecType = ExecType.Rejected;
             Text = Some text;
-            OrdStatus = OrdStatus.Rejected;
+            OrdStatus = OrdStatus.Rejected
         }
     }
     invalidfield:{
@@ -195,7 +195,7 @@ reject (msg:NewOrderSingle, text:string){
             ExecID = msg.ClOrdID;
             ExecType = ExecType.Rejected;
             Text = Some text;
-            OrdStatus = OrdStatus.Rejected;
+            OrdStatus = OrdStatus.Rejected
         }
     }
     invalid:{

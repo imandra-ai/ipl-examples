@@ -72,7 +72,7 @@ receive ( msg : NewOrderSingle ) {
     send ExecutionReport {
         state with 
             ExecID = "";
-            ExecType = ExecType.New;
+            ExecType = ExecType.New
     }
     
 }
@@ -84,7 +84,7 @@ reject ( msg : NewOrderSingle, rejectReason : string ) {
          send ExecutionReport {
             state with
                 ExecID = "";
-                ExecType = ExecType.Rejected;
+                ExecType = ExecType.Rejected
         }
     }
     
@@ -93,7 +93,7 @@ reject ( msg : NewOrderSingle, rejectReason : string ) {
         send ExecutionReport {
             state with
                 ExecID = "";
-                ExecType = ExecType.Rejected;
+                ExecType = ExecType.Rejected
         }    
     }
     
@@ -102,7 +102,7 @@ reject ( msg : NewOrderSingle, rejectReason : string ) {
         send ExecutionReport {
             state with
                 ExecID = "";
-                ExecType = ExecType.Rejected;
+                ExecType = ExecType.Rejected
         }
    }
 }
@@ -127,7 +127,7 @@ receive ( act : time_change ) {
         send ExecutionReport {
             state with 
                 ExecID = "";
-                ExecType = ExecType.New;
+                ExecType = ExecType.New
         }
     }
     

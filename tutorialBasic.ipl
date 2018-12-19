@@ -51,7 +51,7 @@ receive (msg:NewOrderSingle){
         Side = msg.Side;
         OrderQtyData.OrderQty = msg.OrderQtyData.OrderQty;   
         LeavesQty = 0.0;
-        CumQty = 0.0;
+        CumQty = 0.0
     }
 }
 
@@ -66,7 +66,7 @@ reject (msg:NewOrderSingle, text:string){
             OrderQtyData.OrderQty = 0.0;
             LeavesQty = 0.0;
             CumQty = 0.0;
-            Text = Some text;
+            Text = Some text
         }
     }
     invalidfield:{
@@ -79,7 +79,7 @@ reject (msg:NewOrderSingle, text:string){
             OrderQtyData.OrderQty = 0.0;
             LeavesQty = 0.0;
             CumQty = 0.0;
-            Text = Some text;
+            Text = Some text
         }
     }
     invalid:{

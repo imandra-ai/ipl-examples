@@ -22,8 +22,8 @@ message NewOrderSingle {
     req Side
     req TransactTime
     req OrdType
-         valid when it in [[ OrdType.Limit, OrdType.Market ],[OrdType.Limit],[OrdType.Market]]
-         valid when subset(it,[ OrdType.Limit, OrdType.Market ])
+         valid when it in [{| OrdType.Limit, OrdType.Market |},{|OrdType.Limit|},{|OrdType.Market|}]
+         valid when subset(it,{| OrdType.Limit, OrdType.Market |})
     req OrderQtyData.OrderQty valid when it > 0.0
     opt Price
 
@@ -99,7 +99,7 @@ receive ( msg : NewOrderSingle ) {
     send ExecutionReport {
         state with
             ExecID = "";
-            ExecType = ExecType.New;
+            ExecType = ExecType.New
     }
 
 }
@@ -112,7 +112,7 @@ reject ( msg : NewOrderSingle, rejectReason : string ) {
          send ExecutionReport {
             state with
                 ExecID = "";
-                ExecType = ExecType.Rejected;
+                ExecType = ExecType.Rejected
         }
     }
 
@@ -120,7 +120,7 @@ reject ( msg : NewOrderSingle, rejectReason : string ) {
         send ExecutionReport {
             state with
                 ExecID = "";
-                ExecType = ExecType.Rejected;
+                ExecType = ExecType.Rejected
         }
     }
 
@@ -129,7 +129,7 @@ reject ( msg : NewOrderSingle, rejectReason : string ) {
         send ExecutionReport {
             state with
                 ExecID = "";
-                ExecType = ExecType.Rejected;
+                ExecType = ExecType.Rejected
         }
    }
 }
@@ -157,7 +157,7 @@ receive ( act : time_change ) {
         send ExecutionReport {
             state with
                 ExecID = "";
-                ExecType = ExecType.New;
+                ExecType = ExecType.New
         }
     }
 }
@@ -203,6 +203,6 @@ receive ( f : fill ) {
 
     send ExecutionReport { state with
         ExecID = "";
-        ExecType = ExecType.New;
+        ExecType = ExecType.New
     }
 }

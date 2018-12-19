@@ -70,6 +70,9 @@ internal state {
     OrderQtyData : OrderQtyData = {
         CashOrderQty = None;
         OrderQty = Some 0.0;
+        OrderPercent = None;
+        RoundingDirection = None;
+        RoundingModulus = None
     };
 }
 
@@ -90,7 +93,7 @@ receive ( msg : NewOrderSingle ) {
             ExecType = ExecType.New;
             // thus we still need to set this value to something in order to fulfil the requirement
             // that all the required fields are set
-            OrderQtyData.OrderQty = state.CumQty;
+            OrderQtyData.OrderQty = state.CumQty
     }
     
 }

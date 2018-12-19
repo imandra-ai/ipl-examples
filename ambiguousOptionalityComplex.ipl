@@ -117,7 +117,7 @@ receive ( msg : NewOrderSingle ) {
         state with 
             ExecID = "";
             ExecType = ExecType.New;
-            Price = tPambig;
+            Price = tPambig
     }
     
 }

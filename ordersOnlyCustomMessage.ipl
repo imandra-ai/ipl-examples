@@ -91,7 +91,7 @@ receive ( msg : NewOrderSingle ) {
         state with 
             ExecID = "";
             myNewExecutionReportField = AcceptedForBidding;
-            ExecType = ExecType.New;
+            ExecType = ExecType.New
     }
     
 }
@@ -104,7 +104,7 @@ reject ( msg : NewOrderSingle, rejectReason : string ) {
             state with
                 ExecID = "";
                 myNewExecutionReportField = OrdStatus.Expired;
-                ExecType = ExecType.Rejected;
+                ExecType = ExecType.Rejected
         }
     }
     
@@ -114,7 +114,7 @@ reject ( msg : NewOrderSingle, rejectReason : string ) {
             state with
                 ExecID = "";
                 myNewExecutionReportField = OrdStatus.PendingCancel;
-                ExecType = ExecType.Rejected;
+                ExecType = ExecType.Rejected
         }    
     }
     
@@ -124,7 +124,7 @@ reject ( msg : NewOrderSingle, rejectReason : string ) {
             state with
                 ExecID = "";
                 myNewExecutionReportField = newCase;
-                ExecType = ExecType.Rejected;
+                ExecType = ExecType.Rejected
         }
    }
 }
@@ -150,7 +150,7 @@ receive ( act : time_change ) {
             state with 
                 ExecID = "";
                 myNewExecutionReportField = newCase;
-                ExecType = ExecType.New;
+                ExecType = ExecType.New
         }
     }
     

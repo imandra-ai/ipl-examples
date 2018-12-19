@@ -67,7 +67,7 @@ internal state {
     //internal records
     OrderQtyData : OrderQtyData = {
         CashOrderQty = None;
-         OrderQty = Some 0.0;
+         OrderQty = Some 0.0
     };
 }
 
@@ -88,7 +88,7 @@ receive ( msg : NewOrderSingle ) {
             ExecType = ExecType.New;
             // assignment to an entire record which is allowed
             // in this case optionality matches so we can assign
-            OrderQtyData.OrderQty = state.OrderQtyData.OrderQty;
+            OrderQtyData.OrderQty = state.OrderQtyData.OrderQty
             
     }
     

@@ -96,7 +96,7 @@ receive ( msg : NewOrderSingle ) {
     send ExecutionReport {
         state with 
             ExecID = "";
-            ExecType = ExecType.New;
+            ExecType = ExecType.New
     }
     
 }
