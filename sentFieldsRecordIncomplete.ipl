@@ -69,6 +69,9 @@ internal state {
     //internal records
     OrderQtyData : OrderQtyData = {
         CashOrderQty = None;
+        OrderPercent = None;
+        RoundingDirection = None;
+        RoundingModulus = None;
         OrderQty = Some 0.0;
     };
 }

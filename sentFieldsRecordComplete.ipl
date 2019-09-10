@@ -65,9 +65,12 @@ internal state {
     closing_time : UTCTimeOnly = UTCTimeOnly (16, 0, 0, None);
 
     //internal records
-    OrderQtyData : OrderQtyData = {
+    OrderQtyData : OrderQtyData = {    
         CashOrderQty = None;
-         OrderQty = Some 0.0;
+        OrderPercent = None;
+        RoundingDirection = None;
+        RoundingModulus = None;
+        OrderQty = Some 0.0;
     };
 }
 

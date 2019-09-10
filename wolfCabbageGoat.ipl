@@ -65,7 +65,7 @@ outbound message ExecutionReport {
 
 receive (f:fill) {
     if state.cabbage == Eaten || state.goat == Eaten
-    then return
+    then return;
 
      if (state.cabbage == LeftCoast  && state.goat == LeftCoast)  then
     {
@@ -109,7 +109,7 @@ receive (f:fill) {
 
 receive (m:NewOrderSingle){
      if state.cabbage == Eaten || state.goat == Eaten
-    then return
+    then return;
 
      if (state.cabbage == RightCoast && state.goat == RightCoast) then
     {

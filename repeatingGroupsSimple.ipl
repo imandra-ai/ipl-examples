@@ -46,7 +46,7 @@ outbound message ExecutionReport {
     req AvgPx
     // for repeating groups the whole group is imported and the optionality of field elements
     // is the same for each copy
-    req UndInstrmtGrp 
+    req UndInstrmtGrp
         valid when present(it.NoUnderlyings)
         valid when it.UnderlyingInstrument.EncodedUnderlyingIssuer == (Some "a")
         valid when it.UnderlyingInstrument.UndSecAltIDGrp.UnderlyingSecurityAltIDSource == (Some "d")

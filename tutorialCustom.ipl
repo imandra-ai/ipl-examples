@@ -41,7 +41,7 @@ message NewOrderSingle {
     opt SpreadProportion valid when case(it){None:true}{Some x: x>0.0 &&  x<=1.0}
     opt Price 
     ign Account
-    opt ExecInst default = Some [ExecInst.Held]
+    opt ExecInst default = Some {|ExecInst.Held|}
     validate {
          (this.OrdType == OrdType.Market <==> !present(this.Price)) &&
          (this.OrdType == OrdType.Limit ==> present(this.Price)) &&
