@@ -39,9 +39,18 @@ extend message NewOrderSingle {
 }
 
 extend record Parties {
+    PartyIndex "pi" : int
+}
+
+repeatingGroup Parties {
     req NoPartyIDs
     req PartyID
-    PartyIndex "pi" : int
+    req PtysSubGrp
+}
+
+repeatingGroup PtysSubGrp {
+    opt NoPartySubIDs
+    opt PartySubID 
 }
 
 message NewOrderSingle {
