@@ -45,6 +45,7 @@ extend record Parties {
 repeatingGroup Parties {
     req NoPartyIDs
     req PartyID
+    req PartyIndex
     req PtysSubGrp
 }
 
@@ -70,6 +71,7 @@ message NewOrderSingle {
          (this.OrdType == OrdType.Limit ==> present(this.Price)) &&
          (this.OrdType == OrdType.StopSpread ==> present(this.Price))
     }
+    
 
     validate {
         this.OrdType == StopSpread <==>
