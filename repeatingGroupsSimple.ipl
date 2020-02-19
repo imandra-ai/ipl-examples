@@ -55,23 +55,23 @@ outbound message ExecutionReport {
     
 }
 
-repeatingGroup UndSecAltIDGrp {
-    req NoUnderlyingSecurityAltID
-    opt UnderlyingSecurityAltIDSource
-}
-
-repeatingGroup UndInstrmtGrp {
-    req NoUnderlyings
-    opt UnderlyingInstrument.EncodedUnderlyingIssuer
-    req UnderlyingInstrument.UndSecAltIDGrp
-}
-
 action fill {
     // a declaration of an action field which is a repeating group type
     undInstrmntGrp : UndInstrmtGrp
     cumQty : float
 }
 
+
+repeatingGroup UndSecAltIDGrp {
+    req NoUnderlyingSecurityAltID
+    opt UnderlyingSecurityAltIDSource
+}
+
+repeatingGroup UndInstrmtGrp {
+    opt NoUnderlyings
+    opt UnderlyingInstrument.EncodedUnderlyingIssuer
+    req UnderlyingInstrument.UndSecAltIDGrp
+}
 
 message NewOrderSingle {
     opt Account default = Some "d"
