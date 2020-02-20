@@ -62,6 +62,17 @@ action fill {
 }
 
 
+repeatingGroup UndSecAltIDGrp {
+    req NoUnderlyingSecurityAltID
+    opt UnderlyingSecurityAltIDSource
+}
+
+repeatingGroup UndInstrmtGrp {
+    opt NoUnderlyings
+    opt UnderlyingInstrument.EncodedUnderlyingIssuer
+    req UnderlyingInstrument.UndSecAltIDGrp
+}
+
 message NewOrderSingle {
     opt Account default = Some "d"
     opt AccountType

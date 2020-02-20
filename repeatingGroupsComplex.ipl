@@ -53,6 +53,17 @@ outbound message ExecutionReport {
     
 }
 
+repeatingGroup UndSecAltIDGrp {
+    req NoUnderlyingSecurityAltID
+    opt UnderlyingSecurityAltIDSource
+}
+
+repeatingGroup UndInstrmtGrp {
+    opt NoUnderlyings
+    opt UnderlyingInstrument.EncodedUnderlyingIssuer
+    req UnderlyingInstrument.UndSecAltIDGrp
+}
+
 action fill {
     // a declaration of an action field which is a repeating group type
     undInstrmntGrp : UndInstrmtGrp
@@ -95,7 +106,7 @@ receive (msg:NewOrderSingle){
 
 receive (f:fill){
     state.UndInstrmtGrp = f.undInstrmntGrp
-
+    
     if f.cumQty > state.CumQty then
     // here the "with" assignment overrides any within state
     send ExecutionReport {state with CumQty = f.cumQty;}
