@@ -4,7 +4,7 @@ import FIX_4_4
 scenario NewOrderFill {
 	name "NewOrderFill"
 	description "Send NewOrderSingle Message then receive a fill action"
-	events[NewOrderSingle, fill]
+	template[NewOrderSingle, fill]
 }
 
 internal state {

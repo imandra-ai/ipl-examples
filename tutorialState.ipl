@@ -4,7 +4,7 @@ import FIX_4_4
 scenario NewOrderOnly {
 	name "NewOrderOnly"
 	description "Send NewOrderSingle Message"
-	events[NewOrderSingle]
+	template[NewOrderSingle]
 }
 
 internal state {
