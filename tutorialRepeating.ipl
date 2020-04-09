@@ -1,10 +1,10 @@
 import FIX_4_4
 @title: "Repeating Groups Tutorial Example"
 
-scenario NewOrderFill {
+messageFlow NewOrderFill {
 	name "NewOrderFill"
 	description "Initialise Book State, send NewOrderSingle Message then receive a fill action"
-	events[bookState, NewOrderSingle, fill]
+	template[bookState, NewOrderSingle, fill]
 }
 
 internal state {
@@ -108,6 +108,11 @@ action fill {
     validate { this.fill_qty > 0.0 }
     validate { this.fill_qty <= state.LeavesQty}
     validate { this.fill_price > 0.0 }
+    validate {
+        if ( state.Side == Side.Buy ) 
+        then ( this.fill_price >= state.bestAsk )
+        else ( this.fill_price <= state.bestBid )
+    }
     validate {
         (state.OrdType != OrdType.Market) ==>
         ( case state.Price

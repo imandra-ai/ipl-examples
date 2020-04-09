@@ -1,7 +1,7 @@
 import FIX_4_4
 
 scenario Events {
-    events[NewOrderSingle,NewOrderSingle,fill,fill,NewOrderSingle,NewOrderSingle,
+    template[NewOrderSingle,NewOrderSingle,fill,fill,NewOrderSingle,NewOrderSingle,
     fill,fill,fill,NewOrderSingle,NewOrderSingle,NewOrderSingle,
     fill,fill,NewOrderSingle,NewOrderSingle,fill]
 }

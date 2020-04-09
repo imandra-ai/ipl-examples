@@ -2,10 +2,10 @@ import FIX_4_2
 import FIX_4_4
 @title: "Multiple Imports Example"
 
-scenario NewOrderOnly {
+messageFlow NewOrderOnly {
 	name "OrderOnly"
 	description "Send OrderSingle Message"
-	events[OrderSingle]
+	template[OrderSingle]
 }
 
 internal state {
