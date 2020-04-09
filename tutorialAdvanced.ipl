@@ -1,8 +1,9 @@
 import FIX_4_4
+
 @title: "Advanced Tutorial Model"
 
 messageFlow NewOrderFill {
-	name "NewOrderFill"
+    name "NewOrderFill"
 	description "Initialise Book State, send NewOrderSingle Message then receive a fill action"
 	template[bookState, NewOrderSingle, fill]
 }
@@ -13,21 +14,23 @@ precision(Price,2)
 
 internal state {
     assignable{
-        Side:Side 
-        Price:?Price
-        OrderQtyData.OrderQty : Qty 
-        OrdStatus:OrdStatus = OrdStatus.New;
-        OrdType:OrdType 
-        LeavesQty:Qty 
-        CumQty:Qty 
-        SpreadProportion:?float
-        Parties:Parties
-        ExecInst :* ExecInst
+        Side                  :  Side
+        Price                 :? Price
+        OrderQtyData.OrderQty :  Qty
+        OrdStatus             :  OrdStatus = OrdStatus.New;
+        OrdType               :  OrdType
+        LeavesQty             :  Qty
+        CumQty                :  Qty
+        SpreadProportion      :? float
+        Parties               :  Parties
+        ExecInst              :* ExecInst
+        OrderID               :  string
+        ExecType              :  ExecType
     }
     live_order : bool = false;
-    AvgPx : float 
-    bestBid: Price 
-    bestAsk: Price 
+    AvgPx : float
+    bestBid: Price
+    bestAsk: Price
 }
 
 extend enum OrdType {
@@ -51,7 +54,7 @@ repeatingGroup Parties {
 
 repeatingGroup PtysSubGrp {
     opt NoPartySubIDs
-    opt PartySubID 
+    opt PartySubID
 }
 
 message NewOrderSingle {
@@ -61,37 +64,32 @@ message NewOrderSingle {
     req OrdType valid when it in [ OrdType.Limit, OrdType.Market, StopSpread ]
     req OrderQtyData.OrderQty
     opt SpreadProportion valid when case(it){None:true}{Some x: x>0.0 &&  x<=1.0}
-    opt Price 
+    opt Price
     ign Account
     opt ExecInst default = Some {|ExecInst.Held, ExecInst.AllOrNone|}
     req Parties valid when it.PartyIndex > 0 && it.PartyIndex < 100
-                valid when it.PartyID != ""
+                valid when it.PartyID != "N/A"
     validate {
-         (this.OrdType == OrdType.Market <==> !present(this.Price)) &&
+        (this.OrdType == OrdType.Market <==> !present(this.Price)) &&
          (this.OrdType == OrdType.Limit ==> present(this.Price)) &&
          (this.OrdType == OrdType.StopSpread ==> present(this.Price))
     }
-    
-
     validate {
         this.OrdType == StopSpread <==>
             present(this.SpreadProportion)
     }
-
     validate {
-         this.OrdType != OrdType.Market ==>
+        this.OrdType != OrdType.Market ==>
                 (case this.Price
                     {Some price: price > 0.0}
                     {None: false}
                  )
     }
-
     validate {
         case(this.Parties.PtysSubGrp.PartySubID)
             {None:true}
             {Some x : this.Parties.PartyID != x}
     }
-
 }
 
 outbound message ExecutionReport {
@@ -111,11 +109,18 @@ outbound message ExecutionReport {
 action fill {
     fill_price : Price
     fill_qty : Qty
-
-    validate {state.OrdStatus != OrdStatus.PendingNew}
-    validate { this.fill_qty > 0.0 }
-    validate { this.fill_qty <= state.LeavesQty}
-    validate { this.fill_price > 0.0 }
+    validate {
+        state.OrdStatus != OrdStatus.PendingNew
+    }
+    validate {
+        this.fill_qty > 0.0
+    }
+    validate {
+        this.fill_qty <= state.LeavesQty
+    }
+    validate {
+        this.fill_price > 0.0
+    }
     validate {
         if ( state.Side == Side.Buy ) 
         then ( this.fill_price >= state.bestAsk )
@@ -137,67 +142,76 @@ action fill {
 action bookState {
     bestBid : Price
     bestAsk : Price
-    
     validate{
         this.bestAsk > this.bestBid &&
         this.bestBid > 0.0 &&
         this.bestAsk > 0.0
-        }
+    }
 }
-
 
 receive (f:fill) {
     state.LeavesQty = state.LeavesQty - f.fill_qty
     state.AvgPx = ( state.AvgPx * state.CumQty + f.fill_qty * f.fill_price ) / ( f.fill_qty + state.CumQty )
     state.CumQty = state.CumQty + f.fill_qty
-
     if state.LeavesQty == 0.0 then
-        state.OrdStatus = OrdStatus.Filled
+        {
+            state.OrdStatus = OrdStatus.Filled
+            state.ExecType = ExecType.Trade
+        }
     else
-        state.OrdStatus = OrdStatus.PartiallyFilled
-
-    send ExecutionReport { state with
-        OrderID = "";
-        ExecID = "";
+        {
+            state.OrdStatus = OrdStatus.PartiallyFilled
+            state.ExecType = ExecType.Trade
+        }
+    send ExecutionReport {
+        state with
+        ExecID = fresh();
         ExecType = ExecType.New;
     }
 }
+
 receive (ba:bookState){
     state.bestBid = ba.bestBid
     state.bestAsk = ba.bestAsk
-
     let spread = (state.bestAsk - state.bestBid)/state.bestAsk
     if 
     (case(state.SpreadProportion){None:false}{Some x: x >= spread}) &&
         state.OrdStatus == OrdStatus.PendingNew
-        then state.OrdStatus = OrdStatus.New
+        then
+        state.OrdStatus = OrdStatus.New
 }
-
 
 receive (msg:NewOrderSingle) {
     state.live_order = true
     state.LeavesQty = msg.OrderQtyData.OrderQty
+    state.OrderID = fresh()
+    state.ExecType = ExecType.New
     assignFrom(msg,state)
-
     if msg.OrdType == StopSpread
-    then case(msg.SpreadProportion){Some x:
+    then
+        case(msg.SpreadProportion)
+        {Some x:
         if state.bestAsk != 0.0 then
-        if x >= (state.bestAsk - state.bestBid)/state.bestAsk
-            then state.OrdStatus = OrdStatus.New 
-            else state.OrdStatus = OrdStatus.PendingNew
-        else state.OrdStatus = OrdStatus.PendingNew
+            if x >= (state.bestAsk - state.bestBid)/state.bestAsk
+            then
+                state.OrdStatus = OrdStatus.New
+            else
+                state.OrdStatus = OrdStatus.PendingNew
+        else
+            state.OrdStatus = OrdStatus.PendingNew
     }
-
-     send ExecutionReport {state with 
+    send ExecutionReport {
+        state with
         OrderID = msg.ClOrdID;
-        ExecID = "";
-        ExecType = ExecType.New;
+        ExecID = fresh();
     }
 }
 
-reject (msg:NewOrderSingle, text:string){
+reject (msg:NewOrderSingle, text:string)
+{
     missingfield:{
-        send ExecutionReport {state with
+        send ExecutionReport {
+            state with
             OrderID = "unknown order";
             ExecID = "unknown order";
             ExecType = ExecType.Rejected;
@@ -215,5 +229,14 @@ reject (msg:NewOrderSingle, text:string){
         }
     }
     invalid:{
+         send ExecutionReport {state with
+            OrderID = msg.ClOrdID;
+            ExecID = msg.ClOrdID;
+            ExecType = ExecType.Rejected;
+            Text = Some text;
+            OrdStatus = OrdStatus.Rejected;
+        }
     }
+
 }
+

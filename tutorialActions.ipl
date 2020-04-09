@@ -124,7 +124,7 @@ receive (msg:NewOrderSingle) {
 
      send ExecutionReport {state with 
         OrderID = msg.ClOrdID;
-        ExecID = "";
+        ExecID = fresh();
         ExecType = ExecType.New;
     }
 }
@@ -132,13 +132,13 @@ receive (msg:NewOrderSingle) {
 reject (msg:NewOrderSingle, text:string){
     missingfield:{
         send ExecutionReport {state with
-            OrderID = "";
-            ExecID = "";
+            OrderID = fresh();
+            ExecID = fresh();
             ExecType = ExecType.New;
             Text = Some text;
         }
     }
-    invalidfield:{
+    invalidfield, invalid:{
          send ExecutionReport {state with
             OrderID = msg.ClOrdID;
             ExecID = "";
@@ -146,6 +146,5 @@ reject (msg:NewOrderSingle, text:string){
             Text = Some text;
         }
     }
-    invalid:{
-    }
+    
 }
