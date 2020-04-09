@@ -1,10 +1,10 @@
 import FIX_4_4
 @title: "Basic Model"
 
-scenario NewOrderOnly {
+messageFlow NewOrderOnly {
 	name "NewOrderOnly"
 	description "Send NewOrderSingle Message"
-	template[NewOrderSingle]
+	template[NewOrderSingle,_,_,_]
 }
 
 message NewOrderSingle {
@@ -72,7 +72,7 @@ reject (msg:NewOrderSingle, text:string){
     invalidfield:{
          send ExecutionReport with {
             OrderID = msg.ClOrdID;
-            ExecID = "";
+            ExecID = "REJECTID";
             ExecType = ExecType.New;
             OrdStatus = OrdStatus.New;
             Side = Side.Buy;
@@ -83,5 +83,15 @@ reject (msg:NewOrderSingle, text:string){
         }
     }
     invalid:{
-    }
+        send ExecutionReport with {
+            OrderID = msg.ClOrdID;
+            ExecID = "REJECTID";
+            ExecType = ExecType.New;
+            OrdStatus = OrdStatus.New;
+            Side = Side.Buy;
+            OrderQtyData.OrderQty = 0.0;
+            LeavesQty = 0.0;
+            CumQty = 0.0;
+            Text = Some text;
+        }}
 }

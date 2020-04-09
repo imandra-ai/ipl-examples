@@ -1,7 +1,7 @@
 import FIX_4_4
 @title: "Tutorial Model with Actions"
 
-scenario NewOrderFill {
+messageFlow NewOrderFill {
 	name "NewOrderFill"
 	description "Send NewOrderSingle Message then receive a fill action"
 	template[NewOrderSingle, fill]
@@ -66,6 +66,11 @@ action fill {
     validate { this.fill_qty > 0.0 }
     validate { this.fill_qty <= state.LeavesQty}
     validate { this.fill_price > 0.0 }   
+    validate {
+        if ( state.Side == Side.Buy ) 
+        then ( this.fill_price >= state.bestAsk )
+        else ( this.fill_price <= state.bestBid )
+    }
     validate {
         (state.OrdType == OrdType.Limit) ==>
         ( case state.Price

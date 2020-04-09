@@ -1,10 +1,10 @@
 import FIX_4_4
 @title: "Tutorial State Model"
 
-scenario NewOrderOnly {
+messageFlow NewOrderOnly {
 	name "NewOrderOnly"
 	description "Send NewOrderSingle Message"
-	template[NewOrderSingle]
+	template[NewOrderSingle,_,_,_]
 }
 
 internal state {
@@ -37,7 +37,7 @@ message NewOrderSingle {
          (this.OrdType == OrdType.Market <==> !present(this.Price)) &&
          (this.OrdType == OrdType.Limit ==> present(this.Price))
     }
-
+    
     validate {
          this.OrdType == OrdType.Limit ==>
                 (case this.Price
