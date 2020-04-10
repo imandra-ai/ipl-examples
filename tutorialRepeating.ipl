@@ -62,7 +62,7 @@ message NewOrderSingle {
     opt Price
     ign Account
     req Parties valid when it.PartyIndex > 0 && it.PartyIndex < 100
-                valid when it.PartyID != ""
+                valid when it.PartyID != "N/A"
     validate {
         (this.OrdType == OrdType.Market <==> !present(this.Price)) &&
          (this.OrdType == OrdType.Limit ==> present(this.Price)) &&
