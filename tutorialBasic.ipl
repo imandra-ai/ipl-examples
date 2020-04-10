@@ -1,10 +1,11 @@
 import FIX_4_4
+
 @title: "Basic Model"
 
 messageFlow NewOrderOnly {
-	name "NewOrderOnly"
+    name "NewOrderOnly"
 	description "Send NewOrderSingle Message"
-	template[NewOrderSingle,_,_,_]
+	template[NewOrderSingle]
 }
 
 message NewOrderSingle {
@@ -15,14 +16,12 @@ message NewOrderSingle {
     req OrderQtyData.OrderQty
     opt Price
     ign Account
-
-     validate {
-         (this.OrdType == OrdType.Market <==> !present(this.Price)) &&
-         (this.OrdType == OrdType.Limit ==> present(this.Price)) 
-    }
-
     validate {
-         this.OrdType == OrdType.Limit ==>
+        (this.OrdType == OrdType.Market <==> !present(this.Price)) &&
+         (this.OrdType == OrdType.Limit ==> present(this.Price))
+    }
+    validate {
+        this.OrdType == OrdType.Limit ==>
                 (case this.Price
                     {Some price: price > 0.0}
                     {None: false}
@@ -43,25 +42,29 @@ outbound message ExecutionReport {
 }
 
 receive (msg:NewOrderSingle){
-     send ExecutionReport with {
+    send ExecutionReport with {
         OrderID = msg.ClOrdID;
-        ExecID = "";
+        ExecID = fresh();
         ExecType = ExecType.New;
         OrdStatus = OrdStatus.New;
         Side = msg.Side;
-        OrderQtyData.OrderQty = msg.OrderQtyData.OrderQty;   
-        LeavesQty = 0.0;
+        OrderQtyData.OrderQty = msg.OrderQtyData.OrderQty;
+        LeavesQty = msg.OrderQtyData.OrderQty;
         CumQty = 0.0;
     }
 }
 
-reject (msg:NewOrderSingle, text:string){
+reject (msg:NewOrderSingle, text:string)
+{
     missingfield:{
         send ExecutionReport with {
-            OrderID = "";
-            ExecID = "";
+            OrderID = fresh();
+            ExecID = fresh();
             ExecType = ExecType.New;
             OrdStatus = OrdStatus.New;
+            /* we don't have access to the message here as it is 
+             * incomplete, so we must put in a dummy value as it 
+             is required in ExecutionReport */
             Side = Side.Buy;
             OrderQtyData.OrderQty = 0.0;
             LeavesQty = 0.0;
@@ -69,29 +72,18 @@ reject (msg:NewOrderSingle, text:string){
             Text = Some text;
         }
     }
-    invalidfield:{
+    invalidfield, invalid:{
          send ExecutionReport with {
             OrderID = msg.ClOrdID;
             ExecID = "REJECTID";
             ExecType = ExecType.New;
             OrdStatus = OrdStatus.New;
-            Side = Side.Buy;
-            OrderQtyData.OrderQty = 0.0;
-            LeavesQty = 0.0;
+            Side = msg.Side;
+            OrderQtyData.OrderQty = msg.OrderQtyData.OrderQty;
+            LeavesQty = msg.OrderQtyData.OrderQty;
             CumQty = 0.0;
             Text = Some text;
         }
     }
-    invalid:{
-        send ExecutionReport with {
-            OrderID = msg.ClOrdID;
-            ExecID = "REJECTID";
-            ExecType = ExecType.New;
-            OrdStatus = OrdStatus.New;
-            Side = Side.Buy;
-            OrderQtyData.OrderQty = 0.0;
-            LeavesQty = 0.0;
-            CumQty = 0.0;
-            Text = Some text;
-        }}
 }
+

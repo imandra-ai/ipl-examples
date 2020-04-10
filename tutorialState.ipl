@@ -1,28 +1,30 @@
 import FIX_4_4
+
 @title: "Tutorial State Model"
 
 messageFlow NewOrderOnly {
-	name "NewOrderOnly"
+    name "NewOrderOnly"
 	description "Send NewOrderSingle Message"
-	template[NewOrderSingle,_,_,_]
+	template[NewOrderSingle]
 }
 
 internal state {
     assignable{
-        Side:Side 
-        Price:?Price
-        OrderQtyData.OrderQty : Qty 
-        OrdType:OrdType 
-        OrdStatus:OrdStatus = OrdStatus.New;
-        LeavesQty:Qty
-        CumQty:Qty
+        Side                  :  Side
+        Price                 :? Price
+        OrderQtyData.OrderQty :  Qty
+        OrdType               :  OrdType
+        OrdStatus             :  OrdStatus = OrdStatus.PendingNew;
+        ExecType              :  ExecType  = ExecType.PendingNew;
+        LeavesQty             :  Qty
+        CumQty                :  Qty
+        OrderID               :  string
     }
     live_order : bool = false;
     AvgPx : float
-    bestBid : float 
-    bestAsk : float 
+    bestBid : float
+    bestAsk : float
 }
-
 
 message NewOrderSingle {
     req ClOrdID
@@ -32,14 +34,12 @@ message NewOrderSingle {
     req OrderQtyData.OrderQty
     opt Price
     ign Account
-
-     validate {
-         (this.OrdType == OrdType.Market <==> !present(this.Price)) &&
+    validate {
+        (this.OrdType == OrdType.Market <==> !present(this.Price)) &&
          (this.OrdType == OrdType.Limit ==> present(this.Price))
     }
-    
     validate {
-         this.OrdType == OrdType.Limit ==>
+        this.OrdType == OrdType.Limit ==>
                 (case this.Price
                     {Some price: price > 0.0}
                     {None: false}
@@ -62,32 +62,33 @@ outbound message ExecutionReport {
 receive (msg:NewOrderSingle){
     state.live_order = true
     state.LeavesQty = msg.OrderQtyData.OrderQty
+    state.OrderID = fresh()
+    state.OrdStatus = OrdStatus.New
     assignFrom(msg,state)
-
-     send ExecutionReport {state with 
-        OrderID = msg.ClOrdID;
-        ExecID = "";
+    send ExecutionReport {
+        state with
+        ExecID = fresh();
         ExecType = ExecType.New;
     }
 }
 
-reject (msg:NewOrderSingle, text:string){
+reject (msg:NewOrderSingle, text:string)
+{
     missingfield:{
-        send ExecutionReport {state with
-            OrderID = "";
-            ExecID = "";
-            ExecType = ExecType.New;
+        send ExecutionReport {
+            state with
+            ExecID = fresh();
             Text = Some text;
         }
     }
-    invalidfield:{
-         send ExecutionReport {state with
-            OrderID = msg.ClOrdID;
-            ExecID = "";
-            ExecType = ExecType.New;
+    invalidfield, invalid:{
+        state.ExecType = ExecType.Rejected
+        state.OrdStatus = OrdStatus.Rejected
+        send ExecutionReport {
+            state with
+            ExecID = fresh();
             Text = Some text;
         }
-    }
-    invalid:{
     }
 }
+

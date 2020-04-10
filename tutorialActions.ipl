@@ -1,28 +1,30 @@
 import FIX_4_4
+
 @title: "Tutorial Model with Actions"
 
 messageFlow NewOrderFill {
-	name "NewOrderFill"
+    name "NewOrderFill"
 	description "Send NewOrderSingle Message then receive a fill action"
 	template[NewOrderSingle, fill]
 }
 
 internal state {
     assignable{
-        Side:Side = Side.Buy;
-        Price:?Price
-        OrderQtyData.OrderQty : Qty = 0.0;
-        OrdStatus:OrdStatus = OrdStatus.New;
-        OrdType:OrdType = OrdType.Market;
-        LeavesQty:Qty = 0.0;
-        CumQty:Qty = 0.0;
+        Side                  :  Side      = Side.Buy;
+        Price                 :? Price
+        OrderQtyData.OrderQty :  Qty       = 0.0;
+        OrdStatus             :  OrdStatus = OrdStatus.PendingNew;
+        OrdType               :  OrdType   = OrdType.Market;
+        LeavesQty             :  Qty       = 0.0;
+        CumQty                :  Qty       = 0.0;
+        OrderID               :  string
+        ExecType              :  ExecType  = ExecType.PendingNew;
     }
     live_order : bool = false;
     AvgPx : float = 0.0;
     bestBid: Price = 0.0;
     bestAsk: Price = 0.0;
 }
-
 
 message NewOrderSingle {
     req ClOrdID
@@ -32,14 +34,12 @@ message NewOrderSingle {
     req OrderQtyData.OrderQty
     opt Price
     ign Account
-
-     validate {
-         (this.OrdType == OrdType.Market <==> !present(this.Price)) &&
-         (this.OrdType == OrdType.Limit ==> present(this.Price)) 
-    }
-
     validate {
-         this.OrdType == OrdType.Limit ==>
+        (this.OrdType == OrdType.Market <==> !present(this.Price)) &&
+         (this.OrdType == OrdType.Limit ==> present(this.Price))
+    }
+    validate {
+        this.OrdType == OrdType.Limit ==>
                 (case this.Price
                     {Some price: price > 0.0}
                     {None: false}
@@ -62,10 +62,15 @@ outbound message ExecutionReport {
 action fill {
     fill_price : Price
     fill_qty : Qty
-
-    validate { this.fill_qty > 0.0 }
-    validate { this.fill_qty <= state.LeavesQty}
-    validate { this.fill_price > 0.0 }   
+    validate {
+        this.fill_qty > 0.0
+    }
+    validate {
+        this.fill_qty <= state.LeavesQty
+    }
+    validate {
+        this.fill_price > 0.0
+    }
     validate {
         if ( state.Side == Side.Buy ) 
         then ( this.fill_price >= state.bestAsk )
@@ -87,28 +92,30 @@ action fill {
 action bookState {
     bestBid : Price
     bestAsk : Price
-    
     validate{
         this.bestAsk > this.bestBid &&
         this.bestBid > 0.0 &&
         this.bestAsk > 0.0
-        }
+    }
 }
 
 receive (f:fill) {
     state.LeavesQty = state.LeavesQty - f.fill_qty
     state.AvgPx = ( state.AvgPx * state.CumQty + f.fill_qty * f.fill_price ) / ( f.fill_qty + state.CumQty )
     state.CumQty = state.CumQty + f.fill_qty
-
     if state.LeavesQty == 0.0 then
-        state.OrdStatus = OrdStatus.Filled
+        {
+            state.OrdStatus = OrdStatus.Filled
+            state.ExecType = ExecType.Trade
+       }
     else
-        state.OrdStatus = OrdStatus.PartiallyFilled
-
-    send ExecutionReport { state with
-        OrderID = "";
-        ExecID = "";
-        ExecType = ExecType.New;
+        {
+            state.OrdStatus = OrdStatus.PartiallyFilled
+            state.ExecType = ExecType.Trade
+        }
+    send ExecutionReport {
+        state with
+        ExecID = fresh();
     }
 }
 
@@ -120,31 +127,34 @@ receive (ba:bookState){
 receive (msg:NewOrderSingle) {
     state.live_order = true
     state.LeavesQty = msg.OrderQtyData.OrderQty
+    state.OrderID = fresh()
+    state.OrdStatus = OrdStatus.New
+    state.ExecType = ExecType.New
     assignFrom(msg,state)
-
-     send ExecutionReport {state with 
-        OrderID = msg.ClOrdID;
+    send ExecutionReport {
+        state with
         ExecID = fresh();
-        ExecType = ExecType.New;
     }
 }
 
-reject (msg:NewOrderSingle, text:string){
+reject (msg:NewOrderSingle, text:string)
+{
     missingfield:{
-        send ExecutionReport {state with
-            OrderID = fresh();
+        state.ExecType = ExecType.Rejected
+        state.OrdStatus = OrdStatus.Rejected
+        send ExecutionReport {
+            state with
             ExecID = fresh();
-            ExecType = ExecType.New;
             Text = Some text;
         }
     }
     invalidfield, invalid:{
+        state.ExecType = ExecType.Rejected
+        state.OrdStatus = OrdStatus.Rejected
          send ExecutionReport {state with
-            OrderID = msg.ClOrdID;
-            ExecID = "";
-            ExecType = ExecType.New;
+            ExecID = fresh();
             Text = Some text;
         }
     }
-    
 }
+

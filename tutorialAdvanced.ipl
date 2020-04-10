@@ -17,7 +17,7 @@ internal state {
         Side                  :  Side
         Price                 :? Price
         OrderQtyData.OrderQty :  Qty
-        OrdStatus             :  OrdStatus = OrdStatus.New;
+        OrdStatus             :  OrdStatus = OrdStatus.PendingNew;
         OrdType               :  OrdType
         LeavesQty             :  Qty
         CumQty                :  Qty
@@ -25,7 +25,7 @@ internal state {
         Parties               :  Parties
         ExecInst              :* ExecInst
         OrderID               :  string
-        ExecType              :  ExecType
+        ExecType              :  ExecType = ExecType.PendingNew;
     }
     live_order : bool = false;
     AvgPx : float
@@ -38,12 +38,13 @@ extend enum OrdType {
 }
 
 extend message NewOrderSingle {
-    SpreadProportion "sp" :? float
+    SpreadProportion "10001" :? float
 }
 
 extend record Parties {
-    PartyIndex "pi" : int
+    PartyIndex "10002" : int
 }
+
 
 repeatingGroup Parties {
     req NoPartyIDs
@@ -166,7 +167,6 @@ receive (f:fill) {
     send ExecutionReport {
         state with
         ExecID = fresh();
-        ExecType = ExecType.New;
     }
 }
 
@@ -194,15 +194,13 @@ receive (msg:NewOrderSingle) {
         if state.bestAsk != 0.0 then
             if x >= (state.bestAsk - state.bestBid)/state.bestAsk
             then
+            {
                 state.OrdStatus = OrdStatus.New
-            else
-                state.OrdStatus = OrdStatus.PendingNew
-        else
-            state.OrdStatus = OrdStatus.PendingNew
+                state.ExecType = ExecType.New
+            }
     }
     send ExecutionReport {
         state with
-        OrderID = msg.ClOrdID;
         ExecID = fresh();
     }
 }
@@ -210,33 +208,21 @@ receive (msg:NewOrderSingle) {
 reject (msg:NewOrderSingle, text:string)
 {
     missingfield:{
+        state.ExecType = ExecType.Rejected
+        state.OrdStatus = OrdStatus.Rejected
         send ExecutionReport {
             state with
-            OrderID = "unknown order";
-            ExecID = "unknown order";
-            ExecType = ExecType.Rejected;
+            ExecID = fresh();
             Text = Some text;
-            OrdStatus = OrdStatus.Rejected;
         }
     }
-    invalidfield:{
+    invalidfield, invalid:{
+         state.ExecType = ExecType.Rejected
+         state.OrdStatus = OrdStatus.Rejected
          send ExecutionReport {state with
-            OrderID = msg.ClOrdID;
-            ExecID = msg.ClOrdID;
-            ExecType = ExecType.Rejected;
+            ExecID = fresh();         
             Text = Some text;
-            OrdStatus = OrdStatus.Rejected;
-        }
-    }
-    invalid:{
-         send ExecutionReport {state with
-            OrderID = msg.ClOrdID;
-            ExecID = msg.ClOrdID;
-            ExecType = ExecType.Rejected;
-            Text = Some text;
-            OrdStatus = OrdStatus.Rejected;
         }
     }
 
 }
-
