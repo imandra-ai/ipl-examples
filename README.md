@@ -1,4 +1,4 @@
-![Aesthetic Integration](https://storage.googleapis.com/imandra-assets/images/github/ipl_lang_examples_head.svg)
+![Aesthetic Integration](https://storage.googleapis.com/imandra-assets/images/github/ipl_lang_examples_head-2.svg)
 ---
 Welcome to Imandra Protocol Language examples repo.
 
