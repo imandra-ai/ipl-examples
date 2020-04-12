@@ -80,14 +80,13 @@ action fill {
   validate {
     (state.OrdType == OrdType.Limit) ==>
       ( case state.Price
-              { Some p:
-                    if ( state.Side == Side.Buy ) then
-                        ( this.fill_price <= p )
-                    else ( this.fill_price >= p )
-              }
-              { None: true }
-        )
-    }
+        { Some p:
+          if ( state.Side == Side.Buy ) then
+            ( this.fill_price <= p )
+          else ( this.fill_price >= p ) }
+        { None: true }
+      )
+  }
 }
 
 action bookState {
@@ -105,6 +104,7 @@ receive (f:fill) {
   state.LeavesQty = state.LeavesQty - f.fill_qty
   state.AvgPx = ( state.AvgPx * state.CumQty + f.fill_qty * f.fill_price ) / ( f.fill_qty + state.CumQty )
   state.CumQty = state.CumQty + f.fill_qty
+  
   if state.LeavesQty == 0.0 then
   {
     state.OrdStatus = OrdStatus.Filled
