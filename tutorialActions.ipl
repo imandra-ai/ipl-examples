@@ -2,10 +2,12 @@ import FIX_4_4
 
 @title: "Tutorial Model with Actions"
 
-messageFlow NewOrderFill {
-  name "NewOrderFill"
-  description "Send NewOrderSingle Message then receive a fill action"
-  template [NewOrderSingle, fill]
+messageFlows {
+  NewOrderFill {
+    name "NewOrderFill"
+    description "Send NewOrderSingle Message then receive a fill action"
+    template [NewOrderSingle, fill]
+  }
 }
 
 internal state {
@@ -34,12 +36,10 @@ message NewOrderSingle {
   req OrderQtyData.OrderQty
   opt Price
   ign Account
-
   validate {
     (this.OrdType == OrdType.Market <==> !present(this.Price)) &&
     (this.OrdType == OrdType.Limit ==> present(this.Price))
   }
-
   validate {
     this.OrdType == OrdType.Limit ==>
       (case this.Price
@@ -64,19 +64,20 @@ outbound message ExecutionReport {
 action fill {
   fill_price : Price
   fill_qty : Qty
-
-  validate { this.fill_qty > 0.0 }
-
-  validate { this.fill_qty <= state.LeavesQty }
-  
-  validate { this.fill_price > 0.0 }
-
+  validate {
+    this.fill_qty > 0.0
+  }
+  validate {
+    this.fill_qty <= state.LeavesQty
+  }
+  validate {
+    this.fill_price > 0.0
+  }
   validate {
     if ( state.Side == Side.Buy ) 
     then ( this.fill_price >= state.bestAsk )
     else ( this.fill_price <= state.bestBid )
   }
-  
   validate {
     (state.OrdType == OrdType.Limit) ==>
       ( case state.Price
@@ -92,7 +93,6 @@ action fill {
 action bookState {
   bestBid : Price
   bestAsk : Price
-  
   validate{
     this.bestAsk > this.bestBid &&
     this.bestBid > 0.0 &&
@@ -104,16 +104,16 @@ receive (f:fill) {
   state.LeavesQty = state.LeavesQty - f.fill_qty
   state.AvgPx = ( state.AvgPx * state.CumQty + f.fill_qty * f.fill_price ) / ( f.fill_qty + state.CumQty )
   state.CumQty = state.CumQty + f.fill_qty
-  
   if state.LeavesQty == 0.0 then
-  {
-    state.OrdStatus = OrdStatus.Filled
-    state.ExecType = ExecType.Trade
-  } else {
-    state.OrdStatus = OrdStatus.PartiallyFilled
-    state.ExecType = ExecType.Trade
-  }
-  
+    {
+      state.OrdStatus = OrdStatus.Filled
+      state.ExecType = ExecType.Trade
+    }
+  else
+    {
+      state.OrdStatus = OrdStatus.PartiallyFilled
+      state.ExecType = ExecType.Trade
+    }
   send ExecutionReport {
     state with
     ExecID = fresh();
@@ -138,7 +138,8 @@ receive (msg:NewOrderSingle) {
   }
 }
 
-reject (msg:NewOrderSingle, text:string) {
+reject (msg:NewOrderSingle, text:string)
+{
   missingfield : {
     state.ExecType = ExecType.Rejected
     state.OrdStatus = OrdStatus.Rejected
