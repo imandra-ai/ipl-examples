@@ -2,76 +2,78 @@ import FIX_4_4
 
 @title: "Basic Model"
 
-messageFlow NewOrderOnly {
-    name "NewOrderOnly"
-	description "Send NewOrderSingle Message"
+messageFlows {
+  NewOrderOnly {
+      name "NewOrderOnly"
+      description "Send NewOrderSingle Message"
 	template[NewOrderSingle]
+  }
 }
 
 message NewOrderSingle {
-    req ClOrdID
-    req Side
-    req TransactTime
-    req OrdType valid when it in [ OrdType.Limit, OrdType.Market ]
-    req OrderQtyData.OrderQty
-    opt Price
-    ign Account
-    validate {
-        (this.OrdType == OrdType.Market <==> !present(this.Price)) &&
+  req ClOrdID
+  req Side
+  req TransactTime
+  req OrdType valid when it in [ OrdType.Limit, OrdType.Market ]
+  req OrderQtyData.OrderQty
+  opt Price
+  ign Account
+  validate {
+    (this.OrdType == OrdType.Market <==> !present(this.Price)) &&
          (this.OrdType == OrdType.Limit ==> present(this.Price))
-    }
-    validate {
-        this.OrdType == OrdType.Limit ==>
+  }
+  validate {
+    this.OrdType == OrdType.Limit ==>
                 (case this.Price
                     {Some price: price > 0.0}
                     {None: false}
                  )
-    }
+  }
 }
 
 outbound message ExecutionReport {
-    req OrderID
-    req ExecID
-    req ExecType
-    req OrdStatus
-    req Side
-    req OrderQtyData.OrderQty
-    req LeavesQty
-    req CumQty
-    opt Text
+  req OrderID
+  req ExecID
+  req ExecType
+  req OrdStatus
+  req Side
+  req OrderQtyData.OrderQty
+  req LeavesQty
+  req CumQty
+  opt Text
 }
 
 receive (msg:NewOrderSingle){
-    send ExecutionReport with {
-        OrderID = msg.ClOrdID;
-        ExecID = fresh();
-        ExecType = ExecType.New;
-        OrdStatus = OrdStatus.New;
-        Side = msg.Side;
-        OrderQtyData.OrderQty = msg.OrderQtyData.OrderQty;
-        LeavesQty = msg.OrderQtyData.OrderQty;
-        CumQty = 0.0;
-    }
+  send ExecutionReport with {
+    OrderID = msg.ClOrdID;
+    ExecID = fresh();
+    ExecType = ExecType.New;
+    OrdStatus = OrdStatus.New;
+    Side = msg.Side;
+    OrderQtyData.OrderQty = msg.OrderQtyData.OrderQty;
+    LeavesQty = msg.OrderQtyData.OrderQty;
+    CumQty = 0.0;
+  }
 }
 
 reject (msg:NewOrderSingle, text:string)
 {
-    missingfield:{
-        send ExecutionReport with {
-            OrderID = fresh();
-            ExecID = fresh();
-            ExecType = ExecType.New;
-            OrdStatus = OrdStatus.New;
-            /* we don't have access to the message here as it is 
-             * incomplete, so we must put in a dummy value as it 
-             is required in ExecutionReport */
-            Side = Side.Buy;
-            OrderQtyData.OrderQty = 0.0;
-            LeavesQty = 0.0;
-            CumQty = 0.0;
-            Text = Some text;
-        }
+  missingfield:{
+    send ExecutionReport with {
+      OrderID = fresh();
+      ExecID = fresh();
+      ExecType = ExecType.New;
+      OrdStatus = OrdStatus.New;
+      /* we don't have access to the message here as it is 
+       * incomplete, so we must put in a dummy value as it 
+       is required in ExecutionReport */
+      Side = Side.Buy;
+      OrderQtyData.OrderQty = 0.0;
+      LeavesQty = 0.0;
+      CumQty = 0.0;
+      Text = Some text;
     }
+  }
     invalidfield, invalid:{
          send ExecutionReport with {
             OrderID = msg.ClOrdID;

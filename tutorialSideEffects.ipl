@@ -1,31 +1,35 @@
 import FIX_4_2
+
 import FIX_4_4
+
 @title: "Multiple Imports Example"
 
-messageFlow NewOrderOnly {
-	name "OrderOnly"
-	description "Send OrderSingle Message"
-	template[OrderSingle]
+messageFlows {
+  NewOrderOnly {
+    name "OrderOnly"
+    description "Send OrderSingle Message"
+    template[OrderSingle]
+  } 
 }
 
 internal state {
-    assignable {
-        Side : Side = Side.Buy;
-        
-    }
+  assignable {
+    Side :  Side = Side.Buy;
+  }
 }
 
 declare record myRecord {
-    IDSource "22" : IDSource
+  IDSource "22" : IDSource
 }
 
 message OrderSingle {
-    req Side
-    req IDSource
+  req Side
+  req IDSource
 }
 
 message FIX_4_4.ExecutionReport {
-    req Side
-    req PeggedPrice
-    req Instrument.SecurityIDSource
+  req Side
+  req PeggedPrice
+  req Instrument.SecurityIDSource
 }
+
