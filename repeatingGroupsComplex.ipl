@@ -64,9 +64,15 @@ repeatingGroup UndInstrmtGrp {
     req UnderlyingInstrument.UndSecAltIDGrp
 }
 
+// a test to allow record in action
+repeatingGroup UnderlyingStipulations {
+  req NoUnderlyingStips
+}
+
 action fill {
     // a declaration of an action field which is a repeating group type
     undInstrmntGrp : UndInstrmtGrp
+    testRec: UnderlyingInstrument
     cumQty : float
 }
 
