@@ -78,7 +78,7 @@ action fill {
 
 
 message NewOrderSingle {
-    opt Account default = Some "d"
+    opt Account default =  "d"
     opt AccountType
     req ClOrdID
     req Side
