@@ -18,7 +18,7 @@ message NewOrderSingle {
     req Side
     req TransactTime
     req OrdType valid when it in [ OrdType.Limit, OrdType.Market ]
-    opt OrderQtyData.OrderQty default = Some 0.0
+    opt OrderQtyData.OrderQty default =  0.0
     opt Price
 
 	validate { state.live_order == false } 
