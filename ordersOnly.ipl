@@ -3,11 +3,12 @@
 //  Copyright (c) 2014 - 2017
 //
 //  Minimal FIX 4.4 model
-//   
+//
 //  For further info see https://docs.imandra.ai
-// 
+//
 
 import FIX_4_4
+using OrdType {Limit Market}
 
 //
 // Import inbound NewOrderSingle message
@@ -16,15 +17,15 @@ message NewOrderSingle {
     req ClOrdID
     req Side
     req TransactTime
-    req OrdType valid when it in [ OrdType.Limit, OrdType.Market ]
+    req OrdType
     req OrderQtyData.OrderQty
 
 	validate { state.live_order == false  }
 }
-// 
+//
 // Import an outbound message we would send out
-// 
-// 
+//
+//
 outbound message ExecutionReport {
     req OrderID
     req ExecID
@@ -38,7 +39,7 @@ outbound message ExecutionReport {
 
 // Define our internal state
 internal state {
-    // The following fields would be assigned to 
+    // The following fields would be assigned to
     assignable {
         OrdStatus   : OrdStatus = OrdStatus.New;
         Side        : Side = Side.Buy;
@@ -46,15 +47,15 @@ internal state {
         LeavesQty   : Qty = 0.0;
         CumQty      : Qty = 0.0;
         AvgPx       : Price = 0.0;
-        
+
     }
-    
+
     live_order : bool = false;
-    
+
     // These are not required within the orders, etc...
     OrdQty : Qty = 0.0;
     current_time : UTCTimeOnly = UTCTimeOnly (8, 0, 0, None);
-    
+
     // Define the opening and closing times
     opening_time : UTCTimeOnly = UTCTimeOnly (8, 0, 0, None);
     closing_time : UTCTimeOnly = UTCTimeOnly (16, 0, 0, None);
@@ -63,23 +64,23 @@ internal state {
 //  Define how the model should process a validated
 //  incoming NewOrderSingle message
 receive ( msg : NewOrderSingle ) {
-	
+
     // Extract all relevant fields from within the message
     assignFrom (msg, state)
-    
+
     state.live_order = true
-    
+
     send ExecutionReport {
-        state with 
+        state with
             ExecID = "";
             ExecType = ExecType.New;
     }
-    
+
 }
 
 // Handle rejections for 'NewOrderSingle'
 reject ( msg : NewOrderSingle, rejectReason : string ) {
-    // A field is missing 
+    // A field is missing
     missingfield : {
          send ExecutionReport {
             state with
@@ -87,17 +88,17 @@ reject ( msg : NewOrderSingle, rejectReason : string ) {
                 ExecType = ExecType.Rejected;
         }
     }
-    
-    // A field value is 
+
+    // A field value is
     invalidfield : {
         send ExecutionReport {
             state with
                 ExecID = "";
                 ExecType = ExecType.Rejected;
-        }    
+        }
     }
-    
-    // One or more 'validate' statements is 
+
+    // One or more 'validate' statements is
     invalid : {
         send ExecutionReport {
             state with
@@ -110,7 +111,7 @@ reject ( msg : NewOrderSingle, rejectReason : string ) {
 // Define action 'time_change'
 action time_change {
     new_time : UTCTimeOnly
-    
+
     validate { this.new_time >= state.current_time && state.OrdStatus == OrdStatus.New }
 }
 
@@ -123,12 +124,12 @@ receive ( act : time_change ) {
     if ( act.new_time >= state.closing_time) then {
         state.OrdStatus = OrdStatus.Expired
         state.live_order = false
-        
+
         send ExecutionReport {
-            state with 
+            state with
                 ExecID = "";
                 ExecType = ExecType.New;
         }
     }
-    
+
 }
