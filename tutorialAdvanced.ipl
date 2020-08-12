@@ -25,7 +25,7 @@ internal state {
     CumQty                :  Qty
     SpreadProportion      :? float
     Parties               :  Parties
-    ExecInst              :* ExecInst
+    ExecInst              :  ExecInst
     OrderID               :  string
     ExecType              :  ExecType  = ExecType.PendingNew;
   }
@@ -124,7 +124,7 @@ action fill {
     this.fill_price > 0.0
   }
   validate {
-    if ( state.Side == Side.Buy ) 
+    if ( state.Side == Side.Buy )
         then ( this.fill_price >= state.bestAsk )
         else ( this.fill_price <= state.bestBid )
   }
@@ -175,7 +175,7 @@ receive (ba:bookState){
   state.bestBid = ba.bestBid
   state.bestAsk = ba.bestAsk
   let spread = (state.bestAsk - state.bestBid)/state.bestAsk
-  if 
+  if
     (case(state.SpreadProportion){None:false}{Some x: x >= spread}) &&
         state.OrdStatus == OrdStatus.PendingNew
         then
@@ -221,7 +221,7 @@ reject (msg:NewOrderSingle, text:string)
          state.ExecType = ExecType.Rejected
          state.OrdStatus = OrdStatus.Rejected
          send ExecutionReport {state with
-            ExecID = fresh();         
+            ExecID = fresh();
             Text = Some text;
         }
     }
