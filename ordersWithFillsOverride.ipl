@@ -75,7 +75,7 @@ internal state {
         AvgPx       : Price = 0.0;
         Price       :? Price = None;
         OrdType     : OrdType = OrdType.Limit;
-        OrderQtyData.OrderQty : Qty
+        OrderQtyData.OrderQty : OrderQty
     }
 
     live_order : bool = false;
