@@ -3,7 +3,7 @@
 //  Copyright (c) 2014 - 2017
 //
 //  FIX 4.4 model with example repeating groups import
-//   
+//
 //  For further info see https://docs.imandra.ai
 //
 
@@ -11,10 +11,10 @@
 import FIX_4_4
 
 internal state {
-    assignable {        
+    assignable {
         Side : Side = Side.Buy;
         AccountType :? AccountType
-        Account :* string = "";
+        Account : string = "";
         OrderID: string = "";
         ExecID: string = "";
         ExecType:ExecType = ExecType.Trade;
@@ -23,7 +23,7 @@ internal state {
         AvgPx:Price = 0.0;
         OrdStatus:OrdStatus = OrdStatus.Replaced;
         // UndInstrmtGrp is a Repeating Group
-        UndInstrmtGrp: UndInstrmtGrp 
+        UndInstrmtGrp: UndInstrmtGrp
 
         // CFICode is a field within a component block.
         // It is imported in messages both optionally and as a required field
@@ -40,7 +40,7 @@ outbound message ExecutionReport {
     req ExecID
     req ExecType
     req OrdStatus
-    req Side 
+    req Side
     req LeavesQty
     req CumQty
     req AvgPx
@@ -52,7 +52,7 @@ outbound message ExecutionReport {
         valid when it.UnderlyingInstrument.UndSecAltIDGrp.UnderlyingSecurityAltIDSource == (Some "d")
     // for elements of component blocks, each one must be explicitly imported
     opt Instrument.CFICode valid when it == (Some "")
-    
+
 }
 
 action fill {
@@ -79,13 +79,13 @@ message NewOrderSingle {
     req ClOrdID
     req Side
     req TransactTime
-    req OrdType  
-    req UndInstrmtGrp 
+    req OrdType
+    req UndInstrmtGrp
     req Instrument.CFICode
 }
 
 receive (msg:NewOrderSingle){
-    // the state assignable variables are set here 
+    // the state assignable variables are set here
     // including all element of the repeating group recursively
     assignFrom(msg,state)
     send ExecutionReport state
