@@ -49,7 +49,7 @@ outbound message ExecutionReport {
     req UndInstrmtGrp
         valid when present(it.NoUnderlyings)
         valid when it.UnderlyingInstrument.EncodedUnderlyingIssuer == (Some "a")
-        valid when it.UnderlyingInstrument.UndSecAltIDGrp.UnderlyingSecurityAltIDSource == (Some "d")
+        valid when it.UnderlyingInstrument.UndSecAltIDGrp.UnderlyingSecurityAltIDSource == (Some SecurityIDSource.Belgian)
     // for elements of component blocks, each one must be explicitly imported
     opt Instrument.CFICode valid when it == (Some "")
 

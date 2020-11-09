@@ -87,12 +87,13 @@ message NewOrderSingle {
     req UndInstrmtGrp
         valid when present(it.NoUnderlyings)
         valid when it.UnderlyingInstrument.EncodedUnderlyingIssuer == (Some "a")
-        valid when it.UnderlyingInstrument.UndSecAltIDGrp.UnderlyingSecurityAltIDSource == (Some "d")
+        valid when it.UnderlyingInstrument.UndSecAltIDGrp.UnderlyingSecurityAltIDSource == (Some SecurityIDSource.Belgian)
     // for elements of component blocks, each one must be explicitly imported
     req Instrument.CFICode
 
     // this is a validate statement which implicitly checks each copy of every repeating group
-    validate{this.UndInstrmtGrp.UnderlyingInstrument.EncodedUnderlyingIssuer == this.UndInstrmtGrp.UnderlyingInstrument.UndSecAltIDGrp.UnderlyingSecurityAltIDSource &&
+    validate{this.UndInstrmtGrp.UnderlyingInstrument.EncodedUnderlyingIssuer == 
+    (if this.UndInstrmtGrp.UnderlyingInstrument.UndSecAltIDGrp.UnderlyingSecurityAltIDSource == (Some SecurityIDSource.Belgian) then (Some "Belgian") else (Some "NotBelgian")) &&
     this.UndInstrmtGrp.UnderlyingInstrument.EncodedUnderlyingIssuer in ["a","b","c"]}
 }
 

@@ -60,14 +60,14 @@ repeatingGroup PtysSubGrp {
 }
 
 message NewOrderSingle {
-  req ClOrdID
+  opt ClOrdID valid when it != (Some "N/A")
   req Side
   req TransactTime
   req OrdType valid when it in [ OrdType.Limit, OrdType.Market, StopSpread ]
   req OrderQtyData.OrderQty
   opt SpreadProportion valid when case(it){None:true}{Some x: x>0.0 &&  x<=1.0}
   opt Price
-  ign Account
+  opt Account 
   opt ExecInst default = {|ExecInst.Held, ExecInst.AllOrNone|}
   req Parties valid when it.PartyIndex > 0 && it.PartyIndex < 100
                 valid when it.PartyID != "N/A"
