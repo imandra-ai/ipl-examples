@@ -11,7 +11,7 @@
 import FIX_4_4
 
 @encoding: char
-declare enum OrderQty {
+enum OrderQty {
     Zero "0"
     Ten "t"
     Hundred "h"

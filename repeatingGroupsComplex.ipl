@@ -71,7 +71,7 @@ repeatingGroup UnderlyingStipulations {
 
 action fill {
     // a declaration of an action field which is a repeating group type
-    undInstrmntGrp : UndInstrmtGrp
+    //undInstrmntGrp : UndInstrmtGrp
     testRec: UnderlyingInstrument
     cumQty : float
 }
@@ -82,6 +82,7 @@ message NewOrderSingle {
     opt AccountType
     req ClOrdID
     req Side
+    
     req TransactTime
     req OrdType valid when it in [OrdType.Limit, OrdType.Market] valid when it != MarketWithLeftOverAsLimit
     req UndInstrmtGrp
@@ -95,6 +96,8 @@ message NewOrderSingle {
     validate{this.UndInstrmtGrp.UnderlyingInstrument.EncodedUnderlyingIssuer == 
     (if this.UndInstrmtGrp.UnderlyingInstrument.UndSecAltIDGrp.UnderlyingSecurityAltIDSource == (Some SecurityIDSource.Belgian) then (Some "Belgian") else (Some "NotBelgian")) &&
     this.UndInstrmtGrp.UnderlyingInstrument.EncodedUnderlyingIssuer in ["a","b","c"]}
+
+  
 }
 
 receive (msg:NewOrderSingle){
@@ -112,7 +115,7 @@ receive (msg:NewOrderSingle){
 }
 
 receive (f:fill){
-    state.UndInstrmtGrp = f.undInstrmntGrp
+    //state.UndInstrmtGrp = f.undInstrmntGrp
 
     if f.cumQty > state.CumQty then
     // here the "with" assignment overrides any within state
