@@ -5,8 +5,12 @@ import FIX_4_4
 messageFlows {
   NewOrderFill {
     name "NewOrderFill"
-	  description "Initialise Book State, send NewOrderSingle Message then receive a fill action"
-	  template[bookState, NewOrderSingle, fill]
+    description "Initialise Book State, send NewOrderSingle Message then receive a fill action"
+    template [
+      bookState,
+      NewOrderSingle,
+      fill
+    ]
   }
 }
 
@@ -19,7 +23,8 @@ internal state {
     Side                  :  Side
     Price                 :? Price
     OrderQtyData.OrderQty :  Qty
-    OrdStatus             :  OrdStatus = OrdStatus.PendingNew;
+    OrdStatus             :  OrdStatus = 
+    OrdStatus.PendingNew;
     OrdType               :  OrdType
     LeavesQty             :  Qty
     CumQty                :  Qty
@@ -29,10 +34,11 @@ internal state {
     OrderID               :  string
     ExecType              :  ExecType  = ExecType.PendingNew;
   }
-  live_order : bool = false;
-  AvgPx : float
-  bestBid: Price
-  bestAsk: Price
+  live_order: bool
+  =false;
+  AvgPx:float
+  bestBid:Price
+  bestAsk:Price
 }
 
 extend enum OrdType {
@@ -67,7 +73,7 @@ message NewOrderSingle {
   req OrderQtyData.OrderQty
   opt SpreadProportion valid when case(it){None:true}{Some x: x>0.0 &&  x<=1.0}
   opt Price
-  opt Account 
+  opt Account
   opt ExecInst default = {|ExecInst.Held, ExecInst.AllOrNone|}
   req Parties valid when it.PartyIndex > 0 && it.PartyIndex < 100
                 valid when it.PartyID != "N/A"
@@ -217,13 +223,14 @@ reject (msg:NewOrderSingle, text:string)
       Text = Some text;
     }
   }
-    invalidfield, invalid:{
-         state.ExecType = ExecType.Rejected
-         state.OrdStatus = OrdStatus.Rejected
-         send ExecutionReport {state with
-            ExecID = fresh();
-            Text = Some text;
-        }
+  invalidfield, invalid:{
+    state.ExecType = ExecType.Rejected
+    state.OrdStatus = OrdStatus.Rejected
+    send ExecutionReport {
+      state with
+      ExecID = fresh();
+      Text = Some text;
     }
+  }
 }
 

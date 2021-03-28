@@ -18,7 +18,7 @@ internal state {
   }
 }
 
-declare record myRecord {
+record myRecord {
   IDSource "22" : IDSource
 }
 
