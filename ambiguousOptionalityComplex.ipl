@@ -3,11 +3,11 @@
 //  Copyright (c) 2021
 //
 //  Minimal FIX 4.4 model complex treatment
-//  of ambiguous type fields  
+//  of ambiguous type fields
 //
 //  For further info see https://docs.imandra.ai
-// 
-// 
+//
+//
 
 import FIX_4_4
 
@@ -21,9 +21,9 @@ message NewOrderSingle {
     req OrderQtyData.OrderQty
     req Price
     opt Account valid when present(it) valid when (case(it){None:""}{Some x: x}) == "acct_01"
-    opt AccountType valid when it == (Some AccountType.CarriedCustomerSide) && state.CumQty == 0.0 
-	validate { state.live_order == false } 
-	
+    opt AccountType valid when it == (Some AccountType.CarriedCustomerSide) && state.CumQty == 0.0
+	validate { state.live_order == false }
+
 	validate { state.OrdStatus in [ OrdStatus.New ] }
 }
 
@@ -44,22 +44,22 @@ outbound message ExecutionReport {
 // Define the interface state
 internal state {
 
-    // The following fields would be assigned to 
+    // The following fields would be assigned to
     assignable {
         OrdStatus   : OrdStatus = OrdStatus.New;
         Side        : Side
-        OrderID     : string 
+        OrderID     : string
         LeavesQty   : Qty
-        CumQty      : Qty 
-        AvgPx       : Price    
+        CumQty      : Qty
+        AvgPx       : Price
         Price 		:* Price = 0.0;
-        OrdType		: OrdType 
+        OrdType		: OrdType
         DayAvgPx    :? Price
 
     }
-    
+
     live_order : bool = false;
-    
+
     // These are not required within the orders, etc...
     OrdQty : Qty = 0.0;
     filledQty : Qty = 0.0;
@@ -101,23 +101,23 @@ receive ( msg : NewOrderSingle ) {
 
     // Extract all relevant fields from within the message
     assignFrom (msg, state)
-    
+
     state.live_order = true
 
     // reset the DayAvgPx if below a certain figure
     state.temp_Price = case (state.DayAvgPx) {Some x : x} {None : 0.0}
-    
-    state.DayAvgPx = if state.temp_Price > 10.0 
-        then Some state.temp_Price 
+
+    state.DayAvgPx = if state.temp_Price > 10.0
+        then Some state.temp_Price
         else None
 
     // here we override the existing Price assignment in the assignable
     // section of state with one from our local ambiguous variable
     send ExecutionReport {
-        state with 
+        state with
             ExecID = "";
             ExecType = ExecType.New;
             Price = tPambig;
     }
-    
+
 }
