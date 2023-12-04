@@ -12,8 +12,8 @@ import FIX_4_4
 
 // This makes no sense in a real circumstance
 // but demonstrates how multiple values can be overridden and defined
+@encoding: MultipleValueChar
 extend enum OrdType {
-    @encoding: MultipleValueChar
 }
 
 // Import inbound NewOrderSingle message
