@@ -51,6 +51,7 @@ repeatingGroup Parties {
 
 repeatingGroup PtysSubGrp {
   opt NoPartySubIDs
+  req PartySubIDType
   opt PartySubID
 }
 

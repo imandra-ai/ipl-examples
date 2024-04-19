@@ -55,11 +55,12 @@ outbound message ExecutionReport {
 
 repeatingGroup UndSecAltIDGrp {
     req NoUnderlyingSecurityAltID
-    opt UnderlyingSecurityAltIDSource
+    req UnderlyingSecurityAltIDSource
 }
 
 repeatingGroup UndInstrmtGrp {
     opt NoUnderlyings
+    req UnderlyingInstrument.UnderlyingContractMultiplier
     opt UnderlyingInstrument.EncodedUnderlyingIssuer
     req UnderlyingInstrument.UndSecAltIDGrp
 }
@@ -67,6 +68,7 @@ repeatingGroup UndInstrmtGrp {
 // a test to allow record in action
 repeatingGroup UnderlyingStipulations {
   req NoUnderlyingStips
+  req UnderlyingStipType
 }
 
 action fill {
@@ -88,13 +90,13 @@ message NewOrderSingle {
     req UndInstrmtGrp
         valid when present(it.NoUnderlyings)
         valid when it.UnderlyingInstrument.EncodedUnderlyingIssuer == (Some "a")
-        valid when it.UnderlyingInstrument.UndSecAltIDGrp.UnderlyingSecurityAltIDSource == (Some SecurityIDSource.Belgian)
+        valid when it.UnderlyingInstrument.UndSecAltIDGrp.UnderlyingSecurityAltIDSource == SecurityIDSource.Belgian
     // for elements of component blocks, each one must be explicitly imported
     req Instrument.CFICode
 
     // this is a validate statement which implicitly checks each copy of every repeating group
     validate{this.UndInstrmtGrp.UnderlyingInstrument.EncodedUnderlyingIssuer == 
-    (if this.UndInstrmtGrp.UnderlyingInstrument.UndSecAltIDGrp.UnderlyingSecurityAltIDSource == (Some SecurityIDSource.Belgian) then (Some "Belgian") else (Some "NotBelgian")) &&
+    (if this.UndInstrmtGrp.UnderlyingInstrument.UndSecAltIDGrp.UnderlyingSecurityAltIDSource == (SecurityIDSource.Belgian) then (Some "Belgian") else (Some "NotBelgian")) &&
     this.UndInstrmtGrp.UnderlyingInstrument.EncodedUnderlyingIssuer in ["a","b","c"]}
 
   

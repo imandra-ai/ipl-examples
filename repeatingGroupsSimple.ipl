@@ -48,8 +48,8 @@ outbound message ExecutionReport {
     // is the same for each copy
     req UndInstrmtGrp
         valid when present(it.NoUnderlyings)
-        valid when it.UnderlyingInstrument.EncodedUnderlyingIssuer == (Some "a")
-        valid when it.UnderlyingInstrument.UndSecAltIDGrp.UnderlyingSecurityAltIDSource == (Some SecurityIDSource.Belgian)
+        valid when it.UnderlyingInstrument.EncodedUnderlyingIssuer == ("a")
+        valid when it.UnderlyingInstrument.UndSecAltIDGrp.UnderlyingSecurityAltIDSource == SecurityIDSource.Belgian
     // for elements of component blocks, each one must be explicitly imported
     opt Instrument.CFICode valid when it == (Some "")
 
@@ -64,12 +64,12 @@ action fill {
 
 repeatingGroup UndSecAltIDGrp {
     req NoUnderlyingSecurityAltID
-    opt UnderlyingSecurityAltIDSource
+    req UnderlyingSecurityAltIDSource
 }
 
 repeatingGroup UndInstrmtGrp {
     opt NoUnderlyings
-    opt UnderlyingInstrument.EncodedUnderlyingIssuer
+    req UnderlyingInstrument.EncodedUnderlyingIssuer
     req UnderlyingInstrument.UndSecAltIDGrp
 }
 
