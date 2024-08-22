@@ -1,3 +1,14 @@
+//
+//  Imandra Inc.
+//  Copyright (c) 2024
+//
+//  Code for 'Advanced Tutorial Model'
+// 
+//   
+//  For further info see https://docs.imandra.ai
+// 
+// 
+
 import FIX_4_4
 
 @title: "Advanced Tutorial Model"

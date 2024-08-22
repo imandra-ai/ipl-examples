@@ -1,5 +1,15 @@
-import FIX_4_2
+//
+//  Imandra Inc.
+//  Copyright (c) 2024
+//
+//  Code for 'Multiple Imports Example'
+//   
+//  For further info see https://docs.imandra.ai
+// 
+// 
+//
 
+import FIX_4_2
 import FIX_4_4
 
 @title: "Multiple Imports Example"

@@ -1,6 +1,12 @@
-![Aesthetic Integration](https://storage.googleapis.com/imandra-assets/images/github/ipl_lang_examples_head-3.svg)
+![Imandra Inc.](https://storage.googleapis.com/imandra-assets/images/github/ipl_lang_examples_head-3.svg)
+
 ---
-Welcome to Imandra Protocol Language examples repo.
+### Welcome to Imandra Protocol Language examples repo.
+
+For further documentation, please see: [https://docs.imandra.ai](https://docs.imandra.ai).
+
+Download the IPL VS Code Plug-in for these models at the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=aestheticintegration.ipl-vscode).
+
 
 - [ordersOnly.ipl](ordersOnly.ipl) - Minimal model that accepts/rejects `NewOrderSingle`
 - [ordersWithFills.ipl](ordersWithFills.ipl) - Model accepting/rejecting `NewOrderSingle` messages and generating fills
@@ -13,7 +19,7 @@ Welcome to Imandra Protocol Language examples repo.
 - [ambiguousOptionalityComplex.ipl](ambiguousOptionalityComplex.ipl) - Complex treatment of ambiguous type fields
 - [sentFieldsRecordComplete.ipl](sentFieldsRecordComplete.ipl) - Setting sent fields using an internal record (successfully)
 - [sentFieldsRecordIncomplete.ipl](sentFieldsRecordIncomplete.ipl) - Setting sent fields using an internal record requiring addition explicit "with" statements
-- [sentFieldsRecordAssignable.ipl](sentFieldsRecordAssignable.ipl) - Setting sent fields using assignable records.
+- [sentFieldsRecordAssignable.ipl](sentFieldsRecordAssignable.ipl) - Setting sent fields using assignable records
 - [ordersOnlyExplicitFrom42.ipl](ordersOnlyExplicitFrom42.ipl) - FIX 4.4 example of importing a message explicitly from 4.2
 - [ordersOnlyExplicitFrom44.ipl](ordersOnlyExplicitFrom44.ipl) - FIX 4.2 example of importing a message explicitly from 4.4
 - [ordersWithFillsOverride.ipl](ordersWithFillsOverride.ipl) - Example with a field from the library with an overridden type

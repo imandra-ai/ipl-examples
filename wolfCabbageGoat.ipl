@@ -1,4 +1,17 @@
+//
+//  Imandra Inc.
+//  Copyright (c) 2024
+//
+//  Code for 'Wolf-Cabbage-Goat model'
+//   
+//  For further info see https://docs.imandra.ai
+// 
+// 
+//
+
 import FIX_4_4
+
+@title: "Wolf-Cabbage-Goat model"
 
 messageFlows {
   Events {
@@ -17,14 +30,14 @@ enum location {
 
 enum act {
   Pick        "u"
-    Drop        "d"
-    CrossRiver  "c"
+  Drop        "d"
+  CrossRiver  "c"
 }
 
 enum obj {
   Cabbage     "c"
-    Goat        "g"
-    Wolf        "w"
+    Goat      "g"
+    Wolf      "w"
 }
 
 internal state  {
@@ -35,13 +48,13 @@ internal state  {
 }
 
 extend message NewOrderSingle {
-  obj        "o" :? obj
-    act        "a" : act
+    obj "o" :? obj
+    act "a" : act
 }
 
 extend message ExecutionReport {
   obj        "o" :? obj
-    act        "a" : act
+  act        "a" : act
 }
 
 message NewOrderSingle {

@@ -1,10 +1,12 @@
 //
-//  Aesthetic Integration Limited
-//  Copyright (c) 2014 - 2017
+//  Imandra Inc.
+//  Copyright (c) 2024
 //
 //  Minimal FIX 4.4 model with explicit import from 4.2
+// 
 //
 //  For further info see https://docs.imandra.ai
+// 
 // 
 
 import FIX_4_4

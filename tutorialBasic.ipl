@@ -1,3 +1,15 @@
+//
+//  Imandra Inc.
+//  Copyright (c) 2024
+//
+//  Code for 'Basic Model'
+// 
+//   
+//  For further info see https://docs.imandra.ai
+// 
+// 
+
+
 import FIX_4_4
 
 @title: "Basic Model"
