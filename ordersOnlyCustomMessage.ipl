@@ -27,7 +27,7 @@ message NewOrderSingle {
 
 // can extend the message
 extend message NewOrderSingle {
-    myNewOrderSingleField "mnosf" : string
+    myNewOrderSingleField "20001" : string
 }
 
 // 
@@ -48,7 +48,7 @@ outbound message ExecutionReport {
 
 // can extend ExecutionReport
 extend message ExecutionReport {
-    myNewExecutionReportField "mnerp" : OrdStatus
+    myNewExecutionReportField "20002" : OrdStatus
 }
 
 // can extend Enum also
